@@ -29,7 +29,10 @@ class Channel:
 class Color:
     hue: int # 0-360
     saturation: int # 0-100
-
+    def __post_init__(self):
+        assert  360 <= self.hue >= 0, "Hue must be between 0-360"
+        assert 100 <= self.saturation >= 0, "Saturation must be between 0-100"
+        
 class Blackout:
     def apply(self):
         lib.cs_chan_select(1)
