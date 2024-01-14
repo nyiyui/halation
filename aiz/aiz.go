@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"golang.org/x/sync/errgroup"
 )
 
@@ -121,11 +123,11 @@ type State interface {
 
 // Gradient provides a transition from different states.
 // All integers values (unless specified otherwise) are in microseconds.
-// Values are from 0 to 1 inclusive.
+// Floats are from 0 to 1 inclusive.
 type Gradient interface {
-	Duration() int
-	PreferredResolution() int
-	ValueAt(t int) float32
-	Values(resolution int) []float32
+	Duration() time.Duration
+	PreferredResolution() time.Duration
+	ValueAt(t time.Duration) float32
+	Values(resolution time.Duration) []float32
 	TypeName() string
 }

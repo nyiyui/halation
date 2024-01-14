@@ -3,6 +3,8 @@ package osc
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"nyiyui.ca/halation/aiz"
 )
 
@@ -39,11 +41,17 @@ func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {
 			transitions[ch.ChannelID] = [2]Channel{trans[0], ch}
 		}
 	}
-	for i, val := range g.Values(g.PreferredResolution()) {
+	res := g.PreferredResolution()
+	values := g.Values(res)
+	t := time.NewTicker(res)
+	i := 0
+	for range t.C {
+		val := values[i]
 		err := s.applyStep(c, transitions, val)
 		if err != nil {
 			return fmt.Errorf("step %d (t=%f): %w", i, val, err)
 		}
+		i++
 	}
 	return nil
 }
