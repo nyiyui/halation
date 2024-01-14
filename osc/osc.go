@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"nyiyui.ca/halation/aiz"
 )
+
+func init() {
+	aiz.StateTypes["nyiyui.ca/halation/osc"] = func() aiz.State { return new(State) }
+}
 
 const NumberOfChannels = 40
 
