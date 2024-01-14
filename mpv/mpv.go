@@ -4,12 +4,13 @@ package mpv
 import (
 	"errors"
 	"fmt"
-	"github.com/blang/mpv"
-	"log"
-	"nyiyui.ca/halation/aiz"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
+
+	"github.com/blang/mpv"
+	"nyiyui.ca/halation/aiz"
 )
 
 const packageName = "nyiyui.ca/halation/mpv"
@@ -53,11 +54,37 @@ func (c *Client) Register(r *aiz.Runner) {
 
 type State struct {
 	FilePath string
-	Paused   bool
+	Paused   *bool
 	// TODO: Position doesn't work when the file is initially loaded.
-	Position        int
-	Fullscreen      bool
+	Position        *int
+	Fullscreen      *bool
 	ExtraProperties map[string]interface{}
+}
+
+func (s *State) String() string {
+	b := new(strings.Builder)
+	fmt.Fprintf(b, "play %s", s.FilePath)
+	if s.Paused != nil {
+		if *s.Paused {
+			b.WriteString(" (pause)")
+		} else {
+			b.WriteString(" (play)")
+		}
+	}
+	if s.Position != nil {
+		fmt.Fprintf(b, " (%ds)", *s.Position)
+	}
+	if s.Fullscreen != nil {
+		if *s.Fullscreen {
+			b.WriteString(" (full)")
+		} else {
+			b.WriteString(" (window)")
+		}
+	}
+	for key, value := range s.ExtraProperties {
+		fmt.Fprintf(b, " (%s=%s)", key, value)
+	}
+	return b.String()
 }
 
 func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {
@@ -79,27 +106,32 @@ func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {
 	if err != nil {
 		return err
 	}
-	if currentPath != s.FilePath {
+	if s.FilePath != "" && currentPath != s.FilePath {
 		err = c.client.Loadfile(s.FilePath, mpv.LoadFileModeReplace)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = c.client.SetPause(s.Paused)
-	if err != nil {
-		return err
+	if s.Paused != nil {
+		err = c.client.SetPause(*s.Paused)
+		if err != nil {
+			return err
+		}
 	}
 
-	log.Printf("seeking to %d", s.Position)
-	err = c.client.Seek(s.Position, mpv.SeekModeAbsolute)
-	if err != nil {
-		return err
+	if s.Position != nil {
+		err = c.client.Seek(*s.Position, mpv.SeekModeAbsolute)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = c.client.SetFullscreen(s.Fullscreen)
-	if err != nil {
-		return err
+	if s.Fullscreen != nil {
+		err = c.client.SetFullscreen(*s.Fullscreen)
+		if err != nil {
+			return err
+		}
 	}
 
 	for name, value := range s.ExtraProperties {

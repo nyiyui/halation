@@ -1,0 +1,10 @@
+<html>
+{{ $cue := index .show.Cues .cueIndex }}
+<form>
+  <label>
+    Name
+    <input type="text" name="name" value="{{ $cue.Name }}" />
+  </label>
+</form>
+{{ printf "%s" (toJSON $cue) }}
+</html>

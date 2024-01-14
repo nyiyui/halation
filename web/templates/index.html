@@ -1,0 +1,26 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>State</th>
+  </tr>
+  {{ range $i, $cue := .show.Cues }}
+  <tr>
+    <td>
+      {{ $cue.Name }}
+      {{ if eq $i $.runner.CurrentCue }}
+      (current)
+      {{ end }}
+    </td>
+    <td>
+      {{ range $j, $sg := $cue.SGs }}
+      {{ $sg.State }}
+      {{ $sg.Gradient }}
+      <br />
+      {{ end }}
+    </td>
+  </tr>
+  {{ end }}
+</table>
+<pre>
+  {{ printf "%#v" .show.Cues }}
+</pre>
