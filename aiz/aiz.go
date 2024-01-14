@@ -27,10 +27,10 @@ var StateTypes = map[string]func() State{}
 var GradientTypes = map[string]func() Gradient{}
 
 type sgJSON struct {
-	stateType    string
-	state        json.RawMessage
-	gradientType string
-	gradient     json.RawMessage
+	StateType    string
+	State        json.RawMessage
+	GradientType string
+	Gradient     json.RawMessage
 }
 
 func (sg *SG) MarshalJSON() ([]byte, error) {
@@ -43,10 +43,10 @@ func (sg *SG) MarshalJSON() ([]byte, error) {
 		return nil, fmt.Errorf("marshal Gradient: %w", err)
 	}
 	j := sgJSON{
-		stateType:    sg.State.TypeName(),
-		state:        stateJ,
-		gradientType: sg.Gradient.TypeName(),
-		gradient:     gradientJ,
+		StateType:    sg.State.TypeName(),
+		State:        stateJ,
+		GradientType: sg.Gradient.TypeName(),
+		Gradient:     gradientJ,
 	}
 	return json.Marshal(j)
 }
@@ -57,21 +57,21 @@ func (sg *SG) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	stateTypeNew, ok := StateTypes[j.stateType]
+	stateTypeNew, ok := StateTypes[j.StateType]
 	if !ok {
-		return fmt.Errorf("state: no type named %s", j.stateType)
+		return fmt.Errorf("state: no type named %s", j.StateType)
 	}
 	s := stateTypeNew()
-	err = json.Unmarshal(j.state, s)
+	err = json.Unmarshal(j.State, s)
 	if !ok {
 		return fmt.Errorf("unmarshal state: %s", err)
 	}
-	gradientTypeNew, ok := GradientTypes[j.gradientType]
+	gradientTypeNew, ok := GradientTypes[j.GradientType]
 	if !ok {
-		return fmt.Errorf("gradient: no type named %s", j.gradientType)
+		return fmt.Errorf("gradient: no type named %s", j.GradientType)
 	}
 	g := gradientTypeNew()
-	err = json.Unmarshal(j.gradient, s)
+	err = json.Unmarshal(j.Gradient, g)
 	if !ok {
 		return fmt.Errorf("unmarshal gradient: %s", err)
 	}
