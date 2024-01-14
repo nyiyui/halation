@@ -1,2 +1,4 @@
+github.com/blang/mpv v0.0.0-20160810175505-d56d7352e068 h1:P3ukpA1t7dgNIfe21LpB+zIBDQ1Dik9K1DMPdO/TcUA=
+github.com/blang/mpv v0.0.0-20160810175505-d56d7352e068/go.mod h1:E3TTEJpVApQMkhVk3Lr0sAmcbcclY3pGgPbRsy+rdlk=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=

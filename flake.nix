@@ -8,6 +8,8 @@
           requests
         ]))
         go
+        gnumake
+        wget
       ];
     };
   };
