@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
+
 	"nyiyui.ca/halation/aiz"
 )
+
+const packageName = "nyiyui.ca/halation/osc"
 
 func init() {
 	aiz.StateTypes["nyiyui.ca/halation/osc"] = func() aiz.State { return new(State) }
@@ -25,9 +29,31 @@ func NewDefaultClient() *Client {
 		panic(err)
 	}
 	return &Client{
-		HTTP:    &http.Client{},
+		HTTP: &http.Client{
+			Timeout: 1 * time.Second,
+		},
 		BaseURL: u,
 	}
+}
+
+func (c *Client) Register(r *aiz.Runner) {
+	r.Specific[packageName] = c
+}
+
+func (c *Client) Blackout() (err error) {
+	err = c.ChanSelect(1)
+	if err != nil {
+		return
+	}
+	err = c.ChanThru(40)
+	if err != nil {
+		return
+	}
+	err = c.ChanAt(0)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (c *Client) sendGet(command string) error {

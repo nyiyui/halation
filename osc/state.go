@@ -41,17 +41,31 @@ func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {
 			transitions[ch.ChannelID] = [2]Channel{trans[0], ch}
 		}
 	}
-	res := g.PreferredResolution()
-	values := g.Values(res)
-	t := time.NewTicker(res)
-	i := 0
-	for range t.C {
-		val := values[i]
-		err := s.applyStep(c, transitions, val)
-		if err != nil {
-			return fmt.Errorf("step %d (t=%f): %w", i, val, err)
+	/*
+		log.Printf("transitions: %#v", transitions)
+		for key, pair := range transitions {
+			log.Printf("%d: %s → %s", key, pair[0], pair[1])
 		}
-		i++
+	*/
+	if g != nil {
+		res := g.PreferredResolution()
+		values := g.Values(res)
+		t := time.NewTicker(res)
+		i := 0
+		for range t.C {
+			if i >= len(values) {
+				break
+			}
+			val := values[i]
+			err := s.applyStep(c, transitions, val)
+			if err != nil {
+				return fmt.Errorf("step %d (t=%f): %w", i, val, err)
+			}
+			i++
+		}
+	} else {
+		err := s.applyStep(c, transitions, 1)
+		return err
 	}
 	return nil
 }
@@ -66,7 +80,7 @@ func (s *State) applyStep(c *Client, transitions map[int][2]Channel, val float32
 		{ // level
 			delta := next.Level - prev.Level
 			level := int(float32(delta) * val)
-			err := c.ChanAt(level)
+			err := c.ChanAt(prev.Level + level)
 			if err != nil {
 				return err
 			}
@@ -76,7 +90,7 @@ func (s *State) applyStep(c *Client, transitions map[int][2]Channel, val float32
 			deltaS := next.Saturation - prev.Saturation
 			hue := int(float32(deltaH) * val)
 			saturation := int(float32(deltaS) * val)
-			err := c.ColorHS(hue, saturation)
+			err := c.ColorHS(prev.Hue+hue, prev.Saturation+saturation)
 			if err != nil {
 				return err
 			}

@@ -25,7 +25,7 @@ func (l *LinearGradient) ValueAt(i time.Duration) float32 {
 
 func (l *LinearGradient) Values(resolution time.Duration) []float32 {
 	values := make([]float32, 0, l.Duration_/resolution)
-	for i := time.Duration(0); i < l.Duration_; i += resolution {
+	for i := time.Duration(0); i <= l.Duration_; i += resolution {
 		values = append(values, l.ValueAt(i))
 	}
 	return values

@@ -26,4 +26,11 @@ const (
 	// ChannelLx4Multi has blue, green, white in descending number.
 	ChannelLx4Multi      = 35
 	ChannelLx4PinkPurple = 36
+
+	ChannelPotA = 18
+	ChannelPotB = 19
+	ChannelPotC = 20
+	ChannelPotD = 21
+	ChannelPotE = 22
+	ChannelPotF = 23
 )
