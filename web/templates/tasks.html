@@ -1,0 +1,5 @@
+<ul>
+  {{ range $i, $err := .s.tasks.Errors }}
+  <li>{{ $err }}</li>
+  {{ end }}
+</ul>

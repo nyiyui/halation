@@ -1,3 +1,9 @@
+<script type="module">
+  const es = new EventSource("/cue-applied");
+  es.addEventListener("cue-applied", () => {
+    location.reload();
+  });
+</script>
 <table>
   <tr>
     <th>Name</th>

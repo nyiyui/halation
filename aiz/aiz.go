@@ -2,49 +2,13 @@
 package aiz
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"golang.org/x/sync/errgroup"
 )
-
-type Runner struct {
-	Specific   map[string]interface{}
-	CurrentCue int
-}
 
 type Show struct {
 	Cues []Cue `json:"cues"`
-}
-
-func (s *Show) prevCueState(from int, stateType string) (i, j int, state State) {
-	for i := from; i >= 0; i-- {
-		cue := s.Cues[i]
-		for j, sg := range cue.SGs {
-			if sg.State.TypeName() == stateType {
-				return i, j, sg.State
-			}
-		}
-	}
-	return -1, -1, nil
-}
-
-func (s *Show) ApplyCue(r *Runner, i int, ctx context.Context) error {
-	cue := s.Cues[i]
-	errs, ctx := errgroup.WithContext(ctx)
-	for _, sg := range cue.SGs {
-		errs.Go(func() error {
-			var prev State
-			if i != 0 {
-				_, _, prev = s.prevCueState(i-1, sg.State.TypeName())
-			}
-			return sg.State.Reify(r, sg.Gradient, prev)
-		})
-	}
-	r.CurrentCue = i
-	return errs.Wait()
 }
 
 type Cue struct {
@@ -130,4 +94,13 @@ type Gradient interface {
 	ValueAt(t time.Duration) float32
 	Values(resolution time.Duration) []float32
 	TypeName() string
+}
+
+type Trigger interface {
+	// Sendback must return immediately.
+	Sendback(r *Runner, ch chan<- CueRequest) error
+}
+
+type CueRequest struct {
+	CueIndex int
 }
