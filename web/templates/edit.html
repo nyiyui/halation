@@ -1,8 +1,1 @@
-<button id="close-edit-{{ .nodeName }}">Close</button>
-<script type="module">
-  let b = document.getElementById("close-edit-{{ .nodeName }}");
-  b.addEventListener("click", (e) => {
-    b.parentNode.classList.add("popup-backburner");
-  });
-</script>
 {{ template "node.html" . }}

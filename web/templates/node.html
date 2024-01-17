@@ -4,67 +4,116 @@
   }
 </style>
 {{ $root := . }}
-<form method="post">
-  <label>
-    Name
-    <input type="text" name="name" value="{{ .nodeName }}" />
-  </label>
-  <label>
-    Description
-    <input type="text" name="description" value="{{ .node.GetDescription }}" />
-  </label>
-  <label>
-    Type
-    <select name="type">
-      {{ range $i, $t := .availableNodeTypeNames }}
-      <option value="{{ $t }}"{{ if eq $root.node.TypeName $t }} selected {{ end }}>{{ $t }}</option>
-      {{ end }}
-    </select>
-  </label>
-  {{ if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
-    <label>
-      State Type
-      <select name="state-type">
-        <option value="">None</option>
-        {{ range $i, $t := .availableStateTypeNames }}
-        <option value="{{ $t }}"{{ if and $root.node.SG.State (eq $root.node.SG.State.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
-        {{ end }}
-      </select>
-    </label>
-    <label>
-      State
-      <textarea name="state" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.State) }}</textarea>
-    </label>
-    <label>
-      Gradient Type
-      <select name="gradient-type">
-        <option value="">None</option>
-        {{ range $i, $t := .availableGradientTypeNames }}
-        <option value="{{ $t }}"{{ if and $root.node.SG.Gradient (eq $root.node.SG.Gradient.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
-        {{ end }}
-      </select>
-    </label>
-    <label>
-      Gradient
-      <textarea name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
-    </label>
-  {{ end }}
-  <label>
-    Listens To
-    <textarea name="listens-to" rows="10" cols="40">{{ printf "%s" (toJSON .node.GetListensTo) }}</textarea>
-  </label>
-  {{ if .htmx }}
+{{ if .htmx }}
+<nav>
   <button hx-post="/edit?node-name={{ .nodeName }}" hx-target="closest .popup">
     Save
   </button>
-  {{ else }}
-  <input type="submit" value="Save"/>
-  {{ end }}
-  {{/* TODO: saved notification */}}
-</form>
-<details>
-  <summary>Raw JSON</summary>
-<pre>
-{{ printf "%s" (toJSON .node) }}
-</pre>
-</details>
+  <button hx-get="/edit?node-name={{ .nodeName }}" hx-target="closest .popup">
+    Reload
+  </button>
+  <button class="nav-right" id="close-edit-{{ .nodeName }}">Close</button>
+</nav>
+<script type="module">
+  let b = document.getElementById("close-edit-{{ .nodeName }}");
+  b.addEventListener("click", (e) => {
+    b.parentNode.parentNode.classList.add("popup-backburner");
+  });
+  morphIntoDraggable(b.parentNode.parentNode, b.parentNode);
+  
+  function morphIntoDraggable(elem, handle) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    handle.addEventListener("mousedown", dragMouseDown);
+  
+    function dragMouseDown(e) {
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+  
+    function elementDrag(e) {
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      elem.style.top = (elem.offsetTop - pos2) + "px";
+      elem.style.left = (elem.offsetLeft - pos1) + "px";
+    }
+  
+    function closeDragElement() {
+      // stop moving when mouse button is released:
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+</script>
+{{ end }}
+<div class="popup-content">
+  <form method="post">
+    <label>
+      Name
+      <input type="text" name="name" value="{{ .nodeName }}" />
+    </label>
+    <label>
+      Description
+      <input type="text" name="description" value="{{ .node.GetDescription }}" />
+    </label>
+    <label>
+      Type
+      <select name="type">
+        {{ range $i, $t := .availableNodeTypeNames }}
+        <option value="{{ $t }}"{{ if eq $root.node.TypeName $t }} selected {{ end }}>{{ $t }}</option>
+        {{ end }}
+      </select>
+    </label>
+    {{ if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
+      <label>
+        State Type
+        <select name="state-type">
+          <option value="">None</option>
+          {{ range $i, $t := .availableStateTypeNames }}
+          <option value="{{ $t }}"{{ if and $root.node.SG.State (eq $root.node.SG.State.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+          {{ end }}
+        </select>
+      </label>
+      <label>
+        State
+        <textarea name="state" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.State) }}</textarea>
+      </label>
+      <label>
+        Gradient Type
+        <select name="gradient-type">
+          <option value="">None</option>
+          {{ range $i, $t := .availableGradientTypeNames }}
+          <option value="{{ $t }}"{{ if and $root.node.SG.Gradient (eq $root.node.SG.Gradient.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+          {{ end }}
+        </select>
+      </label>
+      <label>
+        Gradient
+        <textarea name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
+      </label>
+    {{ end }}
+    <label>
+      Listens To
+      <textarea name="listens-to" rows="10" cols="40">{{ printf "%s" (toJSON .node.GetListensTo) }}</textarea>
+    </label>
+    {{ if not .htmx }}
+    <input type="submit" value="Save"/>
+    {{ end }}
+    {{/* TODO: saved notification */}}
+  </form>
+  <details>
+    <summary>Raw JSON</summary>
+  <pre>
+  {{ printf "%s" (toJSON .node) }}
+  </pre>
+  </details>
+</div>
