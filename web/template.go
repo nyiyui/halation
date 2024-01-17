@@ -17,7 +17,9 @@ var tmpl *template.Template
 func init() {
 	tmpl = template.Must(template.New("").
 		Funcs(template.FuncMap{
-			"toJSON": json.Marshal,
+			"toJSON": func(v interface{}) ([]byte, error) {
+				return json.MarshalIndent(v, "", "  ")
+			},
 		}).ParseFS(tmplFS, "templates/*.html"))
 }
 
@@ -30,5 +32,6 @@ func (s *Server) renderTemplate(w http.ResponseWriter, r *http.Request, name str
 		http.Error(w, "rendering template failed", 500)
 		return
 	}
+	w.Header().Set("Content-Type", "text/html")
 	io.Copy(w, buf)
 }

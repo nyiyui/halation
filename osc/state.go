@@ -10,11 +10,15 @@ import (
 
 type State struct {
 	// Blackout specifies whether all lights are off. If Blackout is true, everything else is ignored.
-	Blackout bool
+	Blackout bool      `json:"blackout"`
 	Channels []Channel `json:"channels"`
 }
 
 var _ aiz.State = new(State)
+
+func NewBlackoutState() *State {
+	return &State{Blackout: true}
+}
 
 func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {
 	c_, ok := r.Specific["nyiyui.ca/halation/osc"]

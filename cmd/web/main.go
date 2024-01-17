@@ -6,8 +6,9 @@ import (
 
 	"nyiyui.ca/halation/aiz"
 	"nyiyui.ca/halation/gradient"
+	"nyiyui.ca/halation/node"
 	"nyiyui.ca/halation/osc"
-	"nyiyui.ca/halation/trigger"
+	"nyiyui.ca/halation/timeutil"
 	"nyiyui.ca/halation/web"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	http.ListenAndServe(":8080", s)
 }
 
-func initShow() (*aiz.Runner, *aiz.Show) {
+func initShow() (*aiz.Runner, *node.NodeRunner) {
 	runner := &aiz.Runner{Specific: map[string]interface{}{}}
 	runner.Setup()
 	//c := osc.NewDefaultClient()
@@ -54,17 +55,24 @@ func initShow() (*aiz.Runner, *aiz.Show) {
 						{ChannelID: osc.ChannelPotA, Level: 0, Hue: 0, Saturation: 100},
 					},
 				}, Gradient: &gradient.LinearGradient{
-					Duration_:            1 * time.Second,
-					PreferredResolution_: 50 * time.Millisecond,
+					Duration_:            timeutil.Duration(1 * time.Second),
+					PreferredResolution_: timeutil.Duration(50 * time.Millisecond),
 				}},
 			}},
 		},
-		Triggers: []aiz.Trigger{
-			&trigger.Timed{Delay: 0, CueRequest: aiz.CueRequest{0}},
-			&trigger.Timed{Delay: 3 * time.Second, CueRequest: aiz.CueRequest{1}},
-			&trigger.Timed{Delay: 6 * time.Second, CueRequest: aiz.CueRequest{2}},
-		},
 	}
-	show.SetupTriggers(runner)
-	return runner, show
+	_ = show
+	nr := node.NewNodeRunner(runner)
+	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000"}] = node.NewManual()
+	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-state"}] = node.NewSetState(&aiz.SG{State: &osc.State{
+		Channels: []osc.Channel{
+			{ChannelID: osc.ChannelLx4Multi, Level: 0},
+			{ChannelID: osc.ChannelLx4Red, Level: 100},
+			{ChannelID: osc.ChannelPotA, Level: 0, Hue: 0, Saturation: 100},
+		},
+	}})
+	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-state"}].SetListensTo([]node.NodeName{
+		node.NodeName{"nyiyui.ca/halation/cmd/web", "000"},
+	})
+	return runner, nr
 }

@@ -58,7 +58,7 @@ type State struct {
 	// TODO: Position doesn't work when the file is initially loaded.
 	Position        *int
 	Fullscreen      *bool
-	ExtraProperties map[string]interface{}
+	ExtraProperties map[string]interface{} `json:"extraProperties"`
 }
 
 func (s *State) String() string {

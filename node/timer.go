@@ -9,8 +9,15 @@ import (
 
 type Timer struct {
 	*BaseNode
-	Delay      time.Duration  `json:"delay"`
-	CueRequest aiz.CueRequest `json:"cueRequest"`
+	Delay time.Duration `json:"delay"`
+}
+
+func newTimerBlank() *Timer {
+	return &Timer{BaseNode: new(BaseNode)}
+}
+
+func NewTimer(delay time.Duration) *Timer {
+	return &Timer{BaseNode: new(BaseNode), Delay: delay}
 }
 
 func (t *Timer) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stringer, err error) {

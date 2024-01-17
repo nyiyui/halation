@@ -1,0 +1,60 @@
+<style>
+  label {
+    display: block;
+  }
+</style>
+{{ $root := . }}
+<form id="form" method="post">
+  <label>
+    Name
+    <input type="text" name="name" value="{{ .nodeName }}" readonly />
+  </label>
+  <label>
+    Type
+    <select name="type" id="type">
+      {{ range $i, $t := .availableNodeTypeNames }}
+      <option value="{{ $t }}"{{ if eq $root.node.TypeName $t }} selected {{ end }}>{{ $t }}</option>
+      {{ end }}
+    </select>
+  </label>
+  {{ if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
+    <label>
+      State Type
+      <select name="state-type" id="state-type">
+        <option value="">None</option>
+        {{ range $i, $t := .availableStateTypeNames }}
+        <option value="{{ $t }}"{{ if and $root.node.SG.State (eq $root.node.SG.State.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+        {{ end }}
+      </select>
+    </label>
+    <label>
+      State
+      <textarea id="state" name="state" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.State) }}</textarea>
+    </label>
+    <label>
+      Gradient Type
+      <select name="gradient-type" id="gradient-type">
+        <option value="">None</option>
+        {{ range $i, $t := .availableGradientTypeNames }}
+        <option value="{{ $t }}"{{ if and $root.node.SG.Gradient (eq $root.node.SG.Gradient.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+        {{ end }}
+      </select>
+    </label>
+    <label>
+      Gradient
+      <textarea id="gradient" name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
+    </label>
+  {{ end }}
+  <label>
+    Listens To
+    <textarea id="listens-to" name="listens-to" rows="10" cols="40">{{ printf "%s" (toJSON .node.GetListensTo) }}</textarea>
+  </label>
+  <input type="submit" value="Save"/>
+  {{ if .saved }}
+  <span id="saved">Saved.</span>
+  {{ end }}
+  {{/* TODO: remove "Saved." notice the moment the form is edited. */}}
+</form>
+<pre>
+{{ printf "%s" (toJSON .node) }}
+</pre>

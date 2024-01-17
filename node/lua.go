@@ -13,8 +13,9 @@ type EvalLua struct {
 	Source string
 }
 
-func NewEvalLua() *EvalLua {
+func newEvalLuaBlank() *EvalLua {
 	s := new(EvalLua)
+	s.BaseNode = new(BaseNode)
 	return s
 }
 

@@ -15,6 +15,7 @@ type Manual struct {
 
 func NewManual() *Manual {
 	m := new(Manual)
+	m.BaseNode = new(BaseNode)
 	m.MuxS, m.mux = notify.NewMultiplexerSender[fmt.Stringer]("")
 	return m
 }

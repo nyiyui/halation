@@ -95,12 +95,3 @@ type Gradient interface {
 	Values(resolution time.Duration) []float32
 	TypeName() string
 }
-
-type Trigger interface {
-	// Sendback must return immediately.
-	Sendback(r *Runner, ch chan<- CueRequest) error
-}
-
-type CueRequest struct {
-	CueIndex int
-}
