@@ -3,6 +3,7 @@ package osc
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"nyiyui.ca/halation/aiz"
@@ -18,6 +19,23 @@ var _ aiz.State = new(State)
 
 func NewBlackoutState() *State {
 	return &State{Blackout: true}
+}
+
+func (s *State) String() string {
+	if s.Blackout {
+		return "blackout"
+	}
+	b := new(strings.Builder)
+	for i, ch := range s.Channels {
+		if i != 0 {
+			b.WriteString(", ")
+		}
+		fmt.Fprintf(b, "c%v l%v", ch.ChannelID, ch.Level)
+		if ch.Saturation != 0 {
+			fmt.Fprintf(b, " h%v s%v", ch.Hue, ch.Saturation)
+		}
+	}
+	return b.String()
 }
 
 func (s *State) Reify(r *aiz.Runner, g aiz.Gradient, prev_ aiz.State) error {

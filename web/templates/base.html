@@ -1,0 +1,15 @@
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <link rel="stylesheet" href="/static/base.css" />
+     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+   </head>
+   <body>
+     <nav>
+       {{ template "header" . }}
+     </nav>
+     <div id="content">
+       {{ template "content" . }}
+     </div>
+   </body>
+ </html>

@@ -48,6 +48,8 @@ type NodeRequest struct {
 
 // Node is not goroutine-safe.
 type Node interface {
+	GetDescription() string
+	SetDescription(string)
 	GetListensTo() []NodeName
 	SetListensTo([]NodeName)
 	// Activate can block.
@@ -56,8 +58,13 @@ type Node interface {
 }
 
 type BaseNode struct {
-	ListensTo []NodeName
+	Description string
+	ListensTo   []NodeName
 }
+
+func (b *BaseNode) GetDescription() string { return b.Description }
+
+func (b *BaseNode) SetDescription(d string) { b.Description = d }
 
 func (b *BaseNode) GetListensTo() []NodeName { return b.ListensTo }
 
@@ -71,6 +78,10 @@ func NewNodeMap() *NodeMap {
 	return &NodeMap{
 		Nodes: map[NodeName]Node{},
 	}
+}
+
+func (nm *NodeMap) GenListeners() map[NodeName][]NodeName {
+	return nm.genListeners()
 }
 
 func (nm *NodeMap) genListeners() map[NodeName][]NodeName {

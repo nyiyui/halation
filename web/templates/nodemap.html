@@ -1,0 +1,92 @@
+{{ template "base.html" . }}
+
+{{ define "submap" }}
+  {{ range $i, $name := $.names }}
+  {{ $node := index $.nm.Nodes $name }}
+  <div class="node">
+    <section>
+      {{ if $node.GetDescription }}
+        {{ $node.GetDescription }}
+      {{ else }}
+      <code>{{ $name }}</code>
+      {{ end }}
+      <br />
+      <!-- Type: <code>{{ $node.TypeName }}</code> -->
+      Short: <code>{{ $node }}</code>
+      <br />
+      <button 
+        hx-get="/edit?node-name={{ $name }}" 
+        hx-target="#node-i{{ $i }}-modal"
+        class="node-edit"
+        data-target="node-i{{ $i }}-modal"
+      >Edit</button>
+      
+      <div class="popup popup-backburner" id="node-i{{ $i }}-modal"></div>
+    </section>
+    {{ template "submap" (dict
+      "nm" $.nm
+      "names" (index $.listeners $name)
+      "listeners" $.listeners
+    ) }}
+    {{/* detect loops */}}
+  </div>
+  {{ end }}
+{{ end }}
+
+{{ define "header" }}Map{{ end }}
+
+{{ define "content" }}
+<style>
+.map {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+.node {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 4px;
+  padding: 4px;
+  padding-left: 8px;
+  border-top: solid black 2px;
+  border-left: solid black 2px;
+}
+</style>
+<div id="map" class="map">
+  {{ template "submap" (dict "nm" .nr.NM "names" .roots "listeners" .listeners) }}
+</div>
+<script>
+  let latest;
+  // https://stackoverflow.com/a/70691308
+  // Note: persist popup (even after clicking outside) to allow having multiple popups open at the same time.
+  function morphIntoPopup(elem) {
+    const absX = latest.clientX + window.scrollX;
+    const absY = latest.clientY + window.scrollY;
+    
+    const bcrParent = elem.parentElement.getBoundingClientRect();
+    const bcrPopup = elem.getBoundingClientRect();
+    
+    const maxX = bcrParent.width - bcrPopup.width;
+    const maxY = bcrParent.height - bcrPopup.height;
+    
+    console.log(maxX);
+    //const x = Math.max(0, Math.min(absX, maxX));
+    //const y = Math.max(0, Math.min(absY, maxY));
+    const x = absX;
+    const y = absY;
+    
+    elem.classList.remove("popup-backburner");
+    Object.assign(elem.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
+  };
+  addEventListener("mousemove", (e) => { latest = e });
+  addEventListener("htmx:afterRequest", (e) => {
+    if (!e.target.classList.contains("node-edit")) return;
+    let modal = document.getElementById(e.target.dataset.target);
+    morphIntoPopup(modal);
+    console.log(modal);
+  });
+</script>
+{{ end }}

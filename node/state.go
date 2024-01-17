@@ -25,3 +25,7 @@ func (s *SetState) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stri
 }
 
 func (s *SetState) TypeName() string { return "nyiyui.ca/halation/node.SetState" }
+
+func (s *SetState) String() string {
+	return fmt.Sprintf("%s with gradient %v", s.SG.State, s.SG.Gradient)
+}

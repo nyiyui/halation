@@ -8,11 +8,16 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/Masterminds/sprig/v3"
 )
 
 //go:embed templates
 var tmplFS embed.FS
 var tmpl *template.Template
+
+//go:embed static
+var staticFS embed.FS
 
 func init() {
 	tmpl = template.Must(template.New("").
@@ -20,7 +25,12 @@ func init() {
 			"toJSON": func(v interface{}) ([]byte, error) {
 				return json.MarshalIndent(v, "", "  ")
 			},
-		}).ParseFS(tmplFS, "templates/*.html"))
+		}).
+		Funcs(sprig.FuncMap()).ParseFS(tmplFS, "templates/*.html"))
+}
+
+func (s *Server) setupStatic() {
+	s.sm.Handle("/", http.FileServer(http.FS(staticFS)))
 }
 
 func (s *Server) renderTemplate(w http.ResponseWriter, r *http.Request, name string, data map[string]interface{}) {
