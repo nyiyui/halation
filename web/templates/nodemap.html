@@ -33,7 +33,12 @@
   {{ end }}
 {{ end }}
 
-{{ define "header" }}Map{{ end }}
+{{ define "header" }}
+  Map
+  <button id="reload-button" class="nav-right" hx-get="" hx-target="#content" style="display: none;">
+    Reload
+  </button>
+{{ end }}
 
 {{ define "content" }}
 <style>
@@ -55,7 +60,7 @@
 <div id="map" class="map">
   {{ template "submap" (dict "nm" .nr.NM "names" .roots "listeners" .listeners) }}
 </div>
-<script>
+<script type="module">
   let latest;
   // https://stackoverflow.com/a/70691308
   // Note: persist popup (even after clicking outside) to allow having multiple popups open at the same time.
@@ -69,7 +74,6 @@
     const maxX = bcrParent.width - bcrPopup.width;
     const maxY = bcrParent.height - bcrPopup.height;
     
-    console.log(maxX);
     //const x = Math.max(0, Math.min(absX, maxX));
     //const y = Math.max(0, Math.min(absY, maxY));
     const x = absX;
@@ -81,12 +85,30 @@
       top: `${y}px`,
     });
   };
-  addEventListener("mousemove", (e) => { latest = e });
-  addEventListener("htmx:afterRequest", (e) => {
+  function mousemoveListener(e) {
+    latest = e;
+  }
+  function popupListener(e) {
     if (!e.target.classList.contains("node-edit")) return;
     let modal = document.getElementById(e.target.dataset.target);
     morphIntoPopup(modal);
-    console.log(modal);
-  });
+  }
+  addEventListener("mousemove", mousemoveListener);
+  addEventListener("htmx:afterRequest", popupListener);
+  addEventListener("htmx:afterRequest", (e) => { // cleanup
+    if (e.target.id != "content") return;
+    removeEventListener("mousemove", mousemoveListener);
+    removeEventListener("htmx:afterRequest", popupListener);
+  }, { once: true });
+</script>
+<script type="module">
+  import { showReloadButtonOnChange } from "/static/base.js";
+
+  const reloadButton = document.getElementById("reload-button");
+  showReloadButtonOnChange(reloadButton);
+  addEventListener("htmx:afterRequest", (e) => {
+    if (e.target != reloadButton) return;
+    reloadButton.style.display = "block";
+  }, { once: true });
 </script>
 {{ end }}

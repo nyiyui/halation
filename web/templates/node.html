@@ -4,9 +4,10 @@
   }
 </style>
 {{ $root := . }}
+{{ $id := randAlphaNum 20 }} {{/* if we assume amphanum to be ~5 bits of entropy, this should give us 100 bits, making it unlikely enough to have a collision with DOM IDs */}}
 {{ if .htmx }}
 <nav>
-  <button hx-post="/edit?node-name={{ .nodeName }}" hx-target="closest .popup">
+  <button hx-post="/edit?node-name={{ .nodeName }}" hx-include="#popup-form-{{ $id }}" hx-target="closest .popup">
     Save
   </button>
   <button hx-get="/edit?node-name={{ .nodeName }}" hx-target="closest .popup">
@@ -56,7 +57,7 @@
 </script>
 {{ end }}
 <div class="popup-content">
-  <form method="post">
+  <form id="popup-form-{{ $id }}" method="post">
     <label>
       Name
       <input type="text" name="name" value="{{ .nodeName }}" />

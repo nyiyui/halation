@@ -44,7 +44,7 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 
 		newNodeFn, ok := node.NodeTypes[r.PostForm.Get("type")]
 		if !ok {
-			http.Error(w, "invalid node type", 422)
+			http.Error(w, fmt.Sprintf("invalid node type %s", r.PostForm.Get("type")), 422)
 			return
 		}
 		node2 := newNodeFn()
@@ -102,6 +102,7 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 		}
 		node2.SetListensTo(listensTo)
 		func() {
+			s.changeMuxS.Send(Change{NodeName: nodeName})
 			s.nr.NMLock.Lock()
 			defer s.nr.NMLock.Unlock()
 			s.nr.NM.Nodes[nodeName] = node2
@@ -119,7 +120,7 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 	}
 	s.nr.NMLock.RLock()
 	defer s.nr.NMLock.RUnlock()
-	data := s.forTemplate()
+	data := s.forTemplate(r)
 	data["node"] = s.nr.NM.Nodes[nodeName]
 	data["nodeName"] = nodeName
 	data["htmx"] = true
