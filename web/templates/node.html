@@ -14,6 +14,13 @@
     Reload
   </button>
   <button class="nav-right" id="close-edit-{{ .nodeName }}">Close</button>
+  <br />
+  Edit:
+  {{ if .node.GetDescription }}
+  <em>{{ .node.GetDescription }}</em>
+  {{ else }}
+  <em><code>{{ .nodeName }}</code></em>
+  {{ end }}
 </nav>
 <script type="module">
   import { morphIntoDraggable } from "/static/popup.js";

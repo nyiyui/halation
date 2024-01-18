@@ -3,6 +3,7 @@ function morphIntoDraggable(elem, handle) {
   handle.addEventListener("mousedown", dragMouseDown);
 
   function dragMouseDown(e) {
+    if (e.button != 0) return;
     e.preventDefault();
     // get the mouse cursor position at startup:
     pos3 = e.clientX;
