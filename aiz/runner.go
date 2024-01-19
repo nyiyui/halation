@@ -14,8 +14,12 @@ type Runner struct {
 	SGAppliedMux  *notify.Multiplexer[*SG]
 }
 
-func (r *Runner) Setup() {
+func NewRunner() *Runner {
+	r := new(Runner)
+	r.Specific = map[string]interface{}{}
+	r.CurrentStates = map[string]State{}
 	r.sgAppliedMuxS, r.SGAppliedMux = notify.NewMultiplexerSender[*SG]("Runner.sgAppliedMuxS")
+	return r
 }
 
 // ApplySG applies the given sg.

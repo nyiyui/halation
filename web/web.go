@@ -22,26 +22,29 @@ type Change struct {
 }
 
 type Server struct {
-	sm     *http.ServeMux
-	runner *aiz.Runner
-	nr     *node.NodeRunner
-	tasks  *tasks.Tasks
+	sm      *http.ServeMux
+	runner  *aiz.Runner
+	nr      *node.NodeRunner
+	cuelist *node.Cuelist
+	tasks   *tasks.Tasks
 
 	changeMuxS *notify.MultiplexerSender[Change]
 	changeMux  *notify.Multiplexer[Change]
 }
 
-func NewServer(runner *aiz.Runner, nr *node.NodeRunner) *Server {
+func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *Server {
 	s := &Server{
-		sm:     http.NewServeMux(),
-		runner: runner,
-		nr:     nr,
-		tasks:  new(tasks.Tasks),
+		sm:      http.NewServeMux(),
+		runner:  runner,
+		nr:      nr,
+		cuelist: cuelist,
+		tasks:   new(tasks.Tasks),
 	}
 	s.changeMuxS, s.changeMux = notify.NewMultiplexerSender[Change]("Server")
 	s.setupStatic()
 	s.sm.HandleFunc("/map", s.handleMap)
 	s.sm.HandleFunc("/edit", s.handleEdit)
+	s.sm.HandleFunc("/activate", s.handleActivate)
 	//s.sm.HandleFunc("/new", s.handleNew)
 	//s.sm.HandleFunc("/apply", s.handleApply)
 	s.sm.HandleFunc("/tasks", s.handleTasks)
@@ -65,6 +68,7 @@ func (s *Server) forTemplate(r *http.Request) map[string]interface{} {
 	return map[string]interface{}{
 		"runner":                     s.runner,
 		"nr":                         s.nr,
+		"cuelist":                    s.cuelist,
 		"tasks":                      s.tasks,
 		"availableNodeTypeNames":     availableNodeTypeNames,
 		"availableStateTypeNames":    availableStateTypeNames,
@@ -134,4 +138,32 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	io.Copy(w, buf)
+}
+
+func (s *Server) handleActivate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "only POST allowed", 405)
+		return
+	}
+
+	nodeName := node.ParseNodeName(r.URL.Query().Get("node-name"))
+	ok := func() bool {
+		s.nr.NMLock.RLock()
+		defer s.nr.NMLock.RUnlock()
+		_, ok := s.nr.NM.Nodes[nodeName]
+		if !ok {
+			http.Error(w, fmt.Sprintf("node %s does not exist", nodeName), 404)
+			return false
+		}
+		return true
+	}()
+	if !ok {
+		return
+	}
+
+	log.Printf("activate %s", nodeName)
+
+	s.nr.ActivateNode(nodeName, nil)
+
+	http.Error(w, "ok", 200)
 }
