@@ -50,6 +50,9 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 		node2 := newNodeFn()
 		node2.SetDescription(r.PostForm.Get("description"))
 		switch node2.(type) {
+		case *node.EvalLua:
+			source := r.PostForm.Get("source")
+			node2.(*node.EvalLua).Source = source
 		case *node.Manual:
 		case *node.SetState:
 			// === State

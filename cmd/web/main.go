@@ -66,5 +66,19 @@ func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
 	cuelist.Nodes[1.0] = node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}
 	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}] = node.NewManual()
 	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}].SetDescription("Emcees")
+	{
+		m := node.NewManual()
+		m.SetDescription("Idol")
+		nr.NM.Nodes[node.NodeName{"", "002"}] = m
+		t := node.NewTimer(1 * time.Second)
+		t.SetListensTo([]node.NodeName{
+			node.NodeName{"", "002"},
+		})
+		nr.NM.Nodes[node.NodeName{"", "002-t"}] = t
+		nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-mpv"}].SetListensTo([]node.NodeName{
+			node.NodeName{"nyiyui.ca/halation/cmd/web", "001"},
+			node.NodeName{"", "002-t"},
+		})
+	}
 	return runner, nr, cuelist
 }

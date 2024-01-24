@@ -50,7 +50,13 @@
         {{ end }}
       </select>
     </label>
-    {{ if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
+    {{ if eq .node.TypeName "nyiyui.ca/halation/node.EvalLua" }}
+      <label>
+        Source Code
+        <textarea name="source" rows="10" cols="40">{{ .node.Source }}</textarea>
+      </label>
+    {{ else if eq .node.TypeName "nyiyui.ca/halation/node.Manual" }}
+    {{ else if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
       <label>
         State Type
         <select name="state-type">
@@ -77,6 +83,8 @@
         Gradient
         <textarea name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
       </label>
+    {{ else }}
+      <p>Node type not supported.</p>
     {{ end }}
     <label>
       Listens To

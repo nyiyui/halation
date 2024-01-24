@@ -12,3 +12,4 @@ Run `go run ./cmd/test/main.go` for a test using mpv.
 - timing
 - save and load
 - interactive edit
+- look into [WinBox.js](https://nextapps-de.github.io/winbox/) for windows
