@@ -61,6 +61,29 @@ type State struct {
 	ExtraProperties map[string]interface{} `json:"extraProperties"`
 }
 
+func (s *State) Clone() aiz.State {
+	s2 := State{
+		FilePath: s.FilePath,
+	}
+	if s.Paused != nil {
+		paused := *s.Paused
+		s2.Paused = &paused
+	}
+	if s.Position != nil {
+		position := *s.Position
+		s2.Position = &position
+	}
+	if s.Fullscreen != nil {
+		fullscreen := *s.Fullscreen
+		s2.Fullscreen = &fullscreen
+	}
+	s2.ExtraProperties = map[string]interface{}{}
+	for key, val := range s.ExtraProperties {
+		s2.ExtraProperties[key] = val
+	}
+	return &s2
+}
+
 func (s *State) String() string {
 	b := new(strings.Builder)
 	fmt.Fprintf(b, "play %s", s.FilePath)

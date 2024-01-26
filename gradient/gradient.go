@@ -16,6 +16,13 @@ type LinearGradient struct {
 	PreferredResolution_ timeutil.Duration `json:"preferredResolution"`
 }
 
+func (l *LinearGradient) Clone() aiz.Gradient {
+	return &LinearGradient{
+		Duration_:            l.Duration_,
+		PreferredResolution_: l.PreferredResolution_,
+	}
+}
+
 func (l *LinearGradient) Duration() time.Duration { return time.Duration(l.Duration_) }
 
 func (l *LinearGradient) PreferredResolution() time.Duration {

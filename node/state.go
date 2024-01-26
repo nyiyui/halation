@@ -24,6 +24,13 @@ func (s *SetState) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stri
 	return nil, r.ApplySG(s.SG, context.Background())
 }
 
+func (s *SetState) Clone() Node {
+	return &SetState{
+		BaseNode: s.CloneBaseNode(),
+		SG:       s.SG.Clone(),
+	}
+}
+
 func (s *SetState) TypeName() string { return "nyiyui.ca/halation/node.SetState" }
 
 func (s *SetState) String() string {

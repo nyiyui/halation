@@ -47,7 +47,10 @@ type NodeRequest struct {
 }
 
 // Node is not goroutine-safe.
+// Nodes are the basic building blocks for the Halation runtime. See node/README.md for details.
 type Node interface {
+	BaseNodeRef() *BaseNode
+	Clone() Node
 	GetDescription() string
 	SetDescription(string)
 	GetListensTo() []NodeName
@@ -60,7 +63,21 @@ type Node interface {
 type BaseNode struct {
 	Description string
 	ListensTo   []NodeName
+	Promises    []Promise
 }
+
+func (b *BaseNode) CloneBaseNode() *BaseNode {
+	b2 := &BaseNode{
+		Description: b.Description,
+		ListensTo:   make([]NodeName, len(b.ListensTo)),
+		Promises:    make([]Promise, len(b.Promises)),
+	}
+	copy(b2.ListensTo, b.ListensTo)
+	copy(b2.Promises, b.Promises)
+	return b2
+}
+
+func (b *BaseNode) BaseNodeRef() *BaseNode { return b }
 
 func (b *BaseNode) GetDescription() string { return b.Description }
 
@@ -92,6 +109,16 @@ func (nm *NodeMap) genListeners() map[NodeName][]NodeName {
 		}
 	}
 	return listeners
+}
+
+func (nm *NodeMap) genPromiseMap() map[NodeName][]NodeName {
+	pm := map[NodeName][]NodeName{}
+	for user, node := range nm.Nodes {
+		for _, promise := range node.BaseNodeRef().Promises {
+			pm[promise.SupplyNodeName] = append(pm[promise.SupplyNodeName], user)
+		}
+	}
+	return pm
 }
 
 type NodeRunner struct {
@@ -126,8 +153,6 @@ func (nr *NodeRunner) ActivateNode(nn NodeName, params fmt.Stringer) {
 			log.Printf("activating node: %s", err)
 			return
 		}
-		nr.NMLock.RLock()
-		defer nr.NMLock.RUnlock()
 		listeners := nr.NM.genListeners()
 		for _, listener := range listeners[nn] {
 			nr.ActivateNode(listener, result)

@@ -20,6 +20,13 @@ func NewTimer(delay time.Duration) *Timer {
 	return &Timer{BaseNode: new(BaseNode), Delay: delay}
 }
 
+func (t *Timer) Clone() Node {
+	return &Timer{
+		BaseNode: t.CloneBaseNode(),
+		Delay:    t.Delay,
+	}
+}
+
 func (t *Timer) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stringer, err error) {
 	<-time.After(t.Delay)
 	return nil, nil

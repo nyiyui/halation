@@ -21,6 +21,15 @@ func NewBlackoutState() *State {
 	return &State{Blackout: true}
 }
 
+func (s *State) Clone() aiz.State {
+	s2 := State{
+		Blackout: s.Blackout,
+		Channels: make([]Channel, len(s.Channels)),
+	}
+	copy(s2.Channels, s.Channels)
+	return &s2
+}
+
 func (s *State) String() string {
 	if s.Blackout {
 		return "blackout"

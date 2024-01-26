@@ -9,6 +9,7 @@ require (
 	github.com/yuin/gopher-lua v1.1.1
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3
+	layeh.com/gopher-json v0.0.0-20201124131017-552bb3c4c3bf
 )
 
 require (

@@ -21,6 +21,10 @@ type SG struct {
 	Gradient Gradient `json:"gradient"`
 }
 
+func (sg *SG) Clone() *SG {
+	return &SG{sg.State.Clone(), sg.Gradient.Clone()}
+}
+
 var StateTypes = map[string]func() State{}
 var GradientTypes = map[string]func() Gradient{}
 
@@ -83,6 +87,7 @@ func (sg *SG) UnmarshalJSON(data []byte) error {
 type State interface {
 	Reify(r *Runner, g Gradient, prev State) error
 	TypeName() string
+	Clone() State
 }
 
 // Gradient provides a transition from different states.
@@ -94,4 +99,5 @@ type Gradient interface {
 	ValueAt(t time.Duration) float32
 	Values(resolution time.Duration) []float32
 	TypeName() string
+	Clone() Gradient
 }
