@@ -115,16 +115,16 @@ func (s *Server) handleTasks(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMap(w http.ResponseWriter, r *http.Request) {
 	s.nr.NMLock.RLock()
 	defer s.nr.NMLock.RUnlock()
-	listeners := s.nr.NM.GenListeners()
+	pm := s.nr.NM.GenPromiseMap()
 	roots := make([]node.NodeName, 0)
 	for key, node := range s.nr.NM.Nodes {
-		if len(node.GetListensTo()) == 0 {
+		if len(node.BaseNodeRef().Promises) == 0 {
 			roots = append(roots, key)
 		}
 	}
 	data := s.forTemplate(r)
 	data["roots"] = roots
-	data["listeners"] = listeners
+	data["pm"] = pm
 	s.renderTemplate(w, r, "nodemap.html", data)
 }
 
@@ -163,7 +163,7 @@ func (s *Server) handleActivate(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("activate %s", nodeName)
 
-	s.nr.ActivateNode(nodeName, nil)
+	s.nr.ActivateNodeUsingPromises(nodeName, nil)
 
 	http.Error(w, "ok", 200)
 }

@@ -6,9 +6,13 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
 	"nyiyui.ca/halation/aiz"
+	"nyiyui.ca/halation/gradient"
 	"nyiyui.ca/halation/node"
+	"nyiyui.ca/halation/timeutil"
 )
 
 func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +40,16 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("parsing form data failed: %s", err)
 			http.Error(w, "parsing form data failed", 422)
+			return
+		}
+
+		if typeNew := r.PostForm.Get("type"); typeNew != r.PostForm.Get("type-original") {
+			// type changed, redirect to page with node-type-override
+			u := *r.URL
+			q := u.Query()
+			q.Set("node-type-override", typeNew)
+			u.RawQuery = q.Encode()
+			http.Redirect(w, r, u.String(), 302)
 			return
 		}
 
@@ -82,10 +96,27 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				gradient2 = newGradientFn()
-				err = json.Unmarshal([]byte(r.PostForm.Get("gradient")), gradient2)
-				if !ok {
-					http.Error(w, fmt.Sprintf("parsing gradient JSON failed: %s", err), 422)
-					return
+				switch gradientType {
+				case "nyiyui.ca/halation/gradient.LinearGradient":
+					gradient2 := gradient2.(*gradient.LinearGradient)
+					duration, err := time.ParseDuration(r.PostForm.Get("gradient-duration"))
+					if err != nil {
+						http.Error(w, fmt.Sprintf("parsing gradient form failed: duration: %s", err), 422)
+						return
+					}
+					gradient2.Duration_ = timeutil.Duration(duration)
+					preferredResolution, err := time.ParseDuration(r.PostForm.Get("gradient-preferred-resolution"))
+					if err != nil {
+						http.Error(w, fmt.Sprintf("parsing gradient form failed: preferred-resolution: %s", err), 422)
+						return
+					}
+					gradient2.PreferredResolution_ = timeutil.Duration(preferredResolution)
+				default:
+					err = json.Unmarshal([]byte(r.PostForm.Get("gradient")), gradient2)
+					if !ok {
+						http.Error(w, fmt.Sprintf("parsing gradient JSON failed: %s", err), 422)
+						return
+					}
 				}
 			}
 
@@ -97,13 +128,12 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "node type not implemented", 422)
 			return
 		}
-		listensTo := make([]node.NodeName, 0)
-		err = json.Unmarshal([]byte(r.PostForm.Get("listens-to")), &listensTo)
-		if !ok {
-			http.Error(w, fmt.Sprintf("parsing listens-to JSON failed: %s", err), 422)
+		promises, err := parseFormPromises(r.PostForm)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("parsing promises failed: %s", err), 422)
 			return
 		}
-		node2.SetListensTo(listensTo)
+		node2.BaseNodeRef().Promises = promises
 		func() {
 			s.changeMuxS.Send(Change{NodeName: nodeName})
 			s.nr.NMLock.Lock()
@@ -121,11 +151,55 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}()
 	}
+
+	n := s.nr.NM.Nodes[nodeName]
+	nodeTypeOverride := r.URL.Query().Get("node-type-override")
+	if nodeTypeOverride != "" {
+		newNode, ok := node.NodeTypes[nodeTypeOverride]
+		if !ok {
+			http.Error(w, "node-type-override: invalid node type", 422)
+			return
+		}
+		n2 := newNode()
+		*n2.BaseNodeRef() = *n.BaseNodeRef()
+		n = n2
+	}
 	s.nr.NMLock.RLock()
 	defer s.nr.NMLock.RUnlock()
 	data := s.forTemplate(r)
-	data["node"] = s.nr.NM.Nodes[nodeName]
+	data["node"] = n
 	data["nodeName"] = nodeName
-	data["htmx"] = true
 	s.renderTemplate(w, r, "edit.html", data)
+}
+
+func parseFormPromises(data url.Values) ([]node.Promise, error) {
+	p := map[string]node.Promise{}
+	enabled := []string{}
+	for name, value := range data {
+		if !strings.HasPrefix(name, "promise-") {
+			continue
+		}
+		parts := strings.Split(name, "-")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("%s: must have 3 parts only", name)
+		}
+		id := parts[1]
+		switch parts[2] {
+		case "enable":
+			enabled = append(enabled, id)
+		case "field":
+			n := p[id]
+			n.FieldName = value[0]
+			p[id] = n
+		case "supply":
+			n := p[id]
+			n.SupplyNodeName = node.ParseNodeName(value[0])
+			p[id] = n
+		}
+	}
+	result := make([]node.Promise, 0, len(enabled))
+	for _, id := range enabled {
+		result = append(result, p[id])
+	}
+	return result, nil
 }

@@ -2,9 +2,7 @@ package node
 
 import (
 	"fmt"
-	"log"
 	"strings"
-	"sync"
 
 	"nyiyui.ca/halation/aiz"
 )
@@ -42,6 +40,10 @@ func (nn NodeName) String() string {
 	return nn.Package + "." + nn.Name
 }
 
+func (nn NodeName) IsZero() bool {
+	return nn.Package == "" && nn.Name == ""
+}
+
 type NodeRequest struct {
 	Params fmt.Stringer
 }
@@ -53,8 +55,6 @@ type Node interface {
 	Clone() Node
 	GetDescription() string
 	SetDescription(string)
-	GetListensTo() []NodeName
-	SetListensTo([]NodeName)
 	// Activate can block.
 	Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stringer, err error)
 	TypeName() string
@@ -62,17 +62,14 @@ type Node interface {
 
 type BaseNode struct {
 	Description string
-	ListensTo   []NodeName
 	Promises    []Promise
 }
 
 func (b *BaseNode) CloneBaseNode() *BaseNode {
 	b2 := &BaseNode{
 		Description: b.Description,
-		ListensTo:   make([]NodeName, len(b.ListensTo)),
 		Promises:    make([]Promise, len(b.Promises)),
 	}
-	copy(b2.ListensTo, b.ListensTo)
 	copy(b2.Promises, b.Promises)
 	return b2
 }
@@ -82,10 +79,6 @@ func (b *BaseNode) BaseNodeRef() *BaseNode { return b }
 func (b *BaseNode) GetDescription() string { return b.Description }
 
 func (b *BaseNode) SetDescription(d string) { b.Description = d }
-
-func (b *BaseNode) GetListensTo() []NodeName { return b.ListensTo }
-
-func (b *BaseNode) SetListensTo(listensTo []NodeName) { b.ListensTo = listensTo }
 
 type NodeMap struct {
 	Nodes map[NodeName]Node
@@ -97,21 +90,7 @@ func NewNodeMap() *NodeMap {
 	}
 }
 
-func (nm *NodeMap) GenListeners() map[NodeName][]NodeName {
-	return nm.genListeners()
-}
-
-func (nm *NodeMap) genListeners() map[NodeName][]NodeName {
-	listeners := map[NodeName][]NodeName{}
-	for listener, node := range nm.Nodes {
-		for _, listenee := range node.GetListensTo() {
-			listeners[listenee] = append(listeners[listenee], listener)
-		}
-	}
-	return listeners
-}
-
-func (nm *NodeMap) genPromiseMap() map[NodeName][]NodeName {
+func (nm *NodeMap) GenPromiseMap() map[NodeName][]NodeName {
 	pm := map[NodeName][]NodeName{}
 	for user, node := range nm.Nodes {
 		for _, promise := range node.BaseNodeRef().Promises {
@@ -119,43 +98,4 @@ func (nm *NodeMap) genPromiseMap() map[NodeName][]NodeName {
 		}
 	}
 	return pm
-}
-
-type NodeRunner struct {
-	runner *aiz.Runner
-	NM     *NodeMap
-	NMLock sync.RWMutex
-}
-
-func NewNodeRunner(runner *aiz.Runner) *NodeRunner {
-	return &NodeRunner{
-		runner: runner,
-		NM:     NewNodeMap(),
-	}
-}
-
-func (nr *NodeRunner) ActivateNode(nn NodeName, params fmt.Stringer) {
-	var node Node
-	func() {
-		nr.NMLock.RLock()
-		defer nr.NMLock.RUnlock()
-		var ok bool
-		node, ok = nr.NM.Nodes[nn]
-		if !ok {
-			panic("node not found by name")
-		}
-	}()
-	go func() {
-		nr.NMLock.RLock()
-		defer nr.NMLock.RUnlock()
-		result, err := node.Activate(nr.runner, params)
-		if err != nil {
-			log.Printf("activating node: %s", err)
-			return
-		}
-		listeners := nr.NM.genListeners()
-		for _, listener := range listeners[nn] {
-			nr.ActivateNode(listener, result)
-		}
-	}()
 }

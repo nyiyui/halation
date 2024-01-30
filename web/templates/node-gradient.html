@@ -1,0 +1,9 @@
+{{ $pattern := "[0-9]*s([0-9]*ms)?" }}
+<label>
+  Duration
+  <input name="gradient-duration" type="text" value="{{ .Duration_ }}" pattern="{{ $pattern }}" />
+</label>
+<label>
+  Preferred Resolution
+  <input name="gradient-preferred-resolution" type="text" value="{{ .PreferredResolution_ }}" pattern="{{ $pattern }}" />
+</label>

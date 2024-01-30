@@ -3,7 +3,22 @@ package node
 import (
 	"log"
 	"sync"
+
+	"nyiyui.ca/halation/aiz"
 )
+
+type NodeRunner struct {
+	runner *aiz.Runner
+	NM     *NodeMap
+	NMLock sync.RWMutex
+}
+
+func NewNodeRunner(runner *aiz.Runner) *NodeRunner {
+	return &NodeRunner{
+		runner: runner,
+		NM:     NewNodeMap(),
+	}
+}
 
 func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struct{}) {
 	var node Node
@@ -24,7 +39,7 @@ func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struc
 			return
 		}
 		var wg sync.WaitGroup
-		pm := nr.NM.genPromiseMap()
+		pm := nr.NM.GenPromiseMap()
 		for _, user := range pm[nn] {
 			func() {
 				nr.NMLock.Lock()
@@ -33,7 +48,9 @@ func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struc
 					if promise.SupplyNodeName != nn {
 						continue
 					}
-					setValue(nr.NM.Nodes[user], promise.FieldName, result.String())
+					if promise.FieldName != "dummy" {
+						setValue(nr.NM.Nodes[user], promise.FieldName, result.String())
+					}
 				}
 			}()
 			innerDoneCh := make(chan struct{})

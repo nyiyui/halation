@@ -20,6 +20,12 @@ func newEvalLuaBlank() *EvalLua {
 	return s
 }
 
+func NewEvalLua(source string) *EvalLua {
+	s := &EvalLua{Source: source}
+	s.BaseNode = new(BaseNode)
+	return s
+}
+
 func (s *EvalLua) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stringer, err error) {
 	data, err := json.Marshal(params)
 	if err != nil {

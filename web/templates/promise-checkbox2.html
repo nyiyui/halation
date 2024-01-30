@@ -1,0 +1,5 @@
+{{ template "promise-checkbox.html" (dict
+  "checked" (not (getPromise .node.BaseNodeRef.Promises (print .field)).SupplyNodeName.IsZero)
+  "field" .field
+  "node" .node
+) }}

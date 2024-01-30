@@ -42,6 +42,7 @@
       Description
       <input type="text" name="description" value="{{ .node.GetDescription }}" />
     </label>
+    <input type="hidden" name="type-original" value="{{ $root.node.TypeName }}" />
     <label>
       Type
       <select name="type">
@@ -50,46 +51,73 @@
         {{ end }}
       </select>
     </label>
-    {{ if eq .node.TypeName "nyiyui.ca/halation/node.EvalLua" }}
-      <label>
-        Source Code
-        <textarea name="source" rows="10" cols="40">{{ .node.Source }}</textarea>
-      </label>
-    {{ else if eq .node.TypeName "nyiyui.ca/halation/node.Manual" }}
-    {{ else if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
-      <label>
-        State Type
-        <select name="state-type">
-          <option value="">None</option>
-          {{ range $i, $t := .availableStateTypeNames }}
-          <option value="{{ $t }}"{{ if and $root.node.SG.State (eq $root.node.SG.State.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
-          {{ end }}
-        </select>
-      </label>
-      <label>
-        State
-        <textarea name="state" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.State) }}</textarea>
-      </label>
-      <label>
-        Gradient Type
-        <select name="gradient-type">
-          <option value="">None</option>
-          {{ range $i, $t := .availableGradientTypeNames }}
-          <option value="{{ $t }}"{{ if and $root.node.SG.Gradient (eq $root.node.SG.Gradient.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
-          {{ end }}
-        </select>
-      </label>
-      <label>
-        Gradient
-        <textarea name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
-      </label>
-    {{ else }}
-      <p>Node type not supported.</p>
-    {{ end }}
-    <label>
-      Listens To
-      <textarea name="listens-to" rows="10" cols="40">{{ printf "%s" (toJSON .node.GetListensTo) }}</textarea>
-    </label>
+    <fieldset>
+      <legend>Type-Specific</legend>
+      {{ $coveredFields := dict }}
+      {{ if eq .node.TypeName "nyiyui.ca/halation/node.EvalLua" }}
+        {{ $coveredFields = dict "Source" 0 }}
+        <label>
+          Source Code
+          <textarea name="source" rows="10" cols="40">{{ .node.Source }}</textarea>
+        </label>
+        {{ template "promise-checkbox2.html" (dict
+          "field" "Source"
+          "node" .node
+        ) }}
+      {{ else if eq .node.TypeName "nyiyui.ca/halation/node.Manual" }}
+      {{ else if eq .node.TypeName "nyiyui.ca/halation/node.SetState" }}
+        <label>
+          State Type
+          <select name="state-type">
+            <option value="">None</option>
+            {{ range $i, $t := .availableStateTypeNames }}
+            <option value="{{ $t }}"{{ if and $root.node.SG.State (eq $root.node.SG.State.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+            {{ end }}
+          </select>
+        </label>
+        <label>
+          State
+          <textarea name="state" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.State) }}</textarea>
+        </label>
+        <label>
+          Gradient Type
+          <select name="gradient-type">
+            <option value="">None</option>
+            {{ range $i, $t := .availableGradientTypeNames }}
+            <option value="{{ $t }}"{{ if and $root.node.SG.Gradient (eq $root.node.SG.Gradient.TypeName $t) }} selected {{ end }}>{{ $t }}</option>
+            {{ end }}
+          </select>
+        </label>
+        {{ if and .node.SG.Gradient (eq .node.SG.Gradient.TypeName "nyiyui.ca/halation/gradient.LinearGradient") }}
+          {{ template "node-gradient.html" .node.SG.Gradient }}
+        {{ else }}
+          <label>
+            Gradient
+            <textarea name="gradient" rows="10" cols="40">{{ printf "%s" (toJSON .node.SG.Gradient) }}</textarea>
+          </label>
+        {{ end }}
+      {{ else }}
+        <p>Node type not supported.</p>
+      {{ end }}
+    </fieldset>
+    <fieldset>
+      <legend>Other Promises</legend>
+      {{ range $i, $p := .node.BaseNodeRef.Promises }}
+        {{ if (hasKey $coveredFields $p.FieldName) }}{{ continue }}{{ end }}
+        {{ template "promise-checkbox.html" (dict
+          "checked" 1
+          "node" $.node
+          "field" $p.FieldName
+          "fieldEditable" 1
+          "supply" (print $p.SupplyNodeName)
+        ) }}
+      {{ end }}
+      <!-- blank one for adding promises -->
+      {{ template "promise-checkbox.html" (dict
+        "node" .node
+        "fieldEditable" 1
+      ) }}
+    </fieldset>
     {{ if not .htmx }}
     <input type="submit" value="Save"/>
     {{ end }}

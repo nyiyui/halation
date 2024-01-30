@@ -9,11 +9,11 @@ import (
 
 type SetState struct {
 	*BaseNode
-	SG *aiz.SG
+	SG *aiz.SG `halation:""`
 }
 
 func newSetStateBlank() *SetState {
-	return &SetState{BaseNode: new(BaseNode)}
+	return &SetState{BaseNode: new(BaseNode), SG: &aiz.SG{}}
 }
 
 func NewSetState(sg *aiz.SG) *SetState {

@@ -38,10 +38,16 @@ func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
 	//mpvClient.Register(runner)
 
 	nr := node.NewNodeRunner(runner)
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000"}] = node.NewManual()
-	cuelist.Nodes[0] = node.NodeName{"nyiyui.ca/halation/cmd/web", "000"}
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000"}].SetDescription("Pre-show")
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-state"}] = node.NewSetState(&aiz.SG{State: &osc.State{
+	n00 := node.NodeName{"nyiyui.ca/halation/cmd/web", "00"}
+	n01 := node.NodeName{"nyiyui.ca/halation/cmd/web", "01"}
+	n02 := node.NodeName{"nyiyui.ca/halation/cmd/web", "02"}
+	n03 := node.NodeName{"nyiyui.ca/halation/cmd/web", "03"}
+	//n04 := node.NodeName{"nyiyui.ca/halation/cmd/web", "04"}
+	nr.NM.Nodes[n00] = node.NewManual()
+	cuelist.Nodes[0] = n00
+	nr.NM.Nodes[n00].SetDescription("Pre-show")
+
+	nr.NM.Nodes[n01] = node.NewSetState(&aiz.SG{State: &osc.State{
 		Channels: []osc.Channel{
 			{ChannelID: osc.ChannelLeftCentreWall, Level: 100, Hue: 0, Saturation: 0},
 		},
@@ -49,36 +55,18 @@ func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
 		Duration_:            timeutil.Duration(3 * time.Second),
 		PreferredResolution_: timeutil.Duration(100 * time.Millisecond),
 	}})
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-state"}].SetListensTo([]node.NodeName{
-		node.NodeName{"nyiyui.ca/halation/cmd/web", "000"},
-	})
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-state"}].SetDescription("wall")
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-mpv"}] = node.NewSetState(&aiz.SG{State: &osc.State{
-		Blackout: true,
-	}, Gradient: &gradient.LinearGradient{
-		Duration_:            timeutil.Duration(3 * time.Second),
-		PreferredResolution_: timeutil.Duration(100 * time.Millisecond),
-	}})
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-mpv"}].SetListensTo([]node.NodeName{
-		node.NodeName{"nyiyui.ca/halation/cmd/web", "001"},
-	})
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-mpv"}].SetDescription("blackout")
-	cuelist.Nodes[1.0] = node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}] = node.NewManual()
-	nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "001"}].SetDescription("Emcees")
-	{
-		m := node.NewManual()
-		m.SetDescription("Idol")
-		nr.NM.Nodes[node.NodeName{"", "002"}] = m
-		t := node.NewTimer(1 * time.Second)
-		t.SetListensTo([]node.NodeName{
-			node.NodeName{"", "002"},
-		})
-		nr.NM.Nodes[node.NodeName{"", "002-t"}] = t
-		nr.NM.Nodes[node.NodeName{"nyiyui.ca/halation/cmd/web", "000-mpv"}].SetListensTo([]node.NodeName{
-			node.NodeName{"nyiyui.ca/halation/cmd/web", "001"},
-			node.NodeName{"", "002-t"},
-		})
+	nr.NM.Nodes[n01].BaseNodeRef().Promises = []node.Promise{
+		{"dummy", n00},
 	}
+	nr.NM.Nodes[n01].SetDescription("wall")
+
+	nr.NM.Nodes[n02] = node.NewEvalLua(`print("hello from lua")`)
+	nr.NM.Nodes[n02].BaseNodeRef().Promises = []node.Promise{
+		{"dummy", n01},
+	}
+	nr.NM.Nodes[n02].SetDescription("Lua")
+	cuelist.Nodes[1.0] = n03
+	nr.NM.Nodes[n03] = node.NewManual()
+	nr.NM.Nodes[n03].SetDescription("Emcees")
 	return runner, nr, cuelist
 }

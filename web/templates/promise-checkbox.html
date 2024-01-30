@@ -1,0 +1,29 @@
+{{ $id := randAlphaNum 20 }}
+<label>
+  <input name="promise-{{ $id }}-enable" type="checkbox"{{ if .checked }} checked{{ end }}/>
+  Promise
+</label>
+<div class="promise">
+  {{ if .fieldEditable }}
+    <label>
+      Field
+      <input name="promise-{{ $id }}-field" type="text" value="{{ .field }}" minlength="1" list="promise-{{ $id }}-fields"/>
+    </label>
+    <datalist id="promise-{{ $id }}-fields">
+      {{ range $i, $field := nodeTypeFieldlist .node.TypeName }}
+        <option value="{{ $field }}">
+      {{ end }}
+    </datalist>
+  {{ else }}
+    <input name="promise-{{ $id }}-field" type="hidden" value="{{ .field }}" />
+  {{ end }}
+  <label>
+    Supply
+    <input
+      name="promise-{{ $id }}-supply"
+      type="text"
+      {{ if .supply }}value="{{ .supply }}"
+      {{ else if .field }}value="{{ (getPromise .node.BaseNodeRef.Promises .field).SupplyNodeName }}"{{ end }}
+    />
+  </label>
+</div>
