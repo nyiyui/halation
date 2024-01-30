@@ -2,11 +2,14 @@ package web
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 
 	"nyiyui.ca/halation/aiz"
 	_ "nyiyui.ca/halation/gradient"
@@ -45,7 +48,7 @@ func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *
 	s.sm.HandleFunc("/map", s.handleMap)
 	s.sm.HandleFunc("/edit", s.handleEdit)
 	s.sm.HandleFunc("/activate", s.handleActivate)
-	//s.sm.HandleFunc("/new", s.handleNew)
+	s.sm.HandleFunc("/new", s.handleNew)
 	//s.sm.HandleFunc("/apply", s.handleApply)
 	s.sm.HandleFunc("/tasks", s.handleTasks)
 	s.sm.HandleFunc("/events/change", s.handleChange)
@@ -166,4 +169,30 @@ func (s *Server) handleActivate(w http.ResponseWriter, r *http.Request) {
 	s.nr.ActivateNodeUsingPromises(nodeName, nil)
 
 	http.Error(w, "ok", 200)
+}
+
+func randomHex(n int) string {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(bytes)
+}
+
+func (s *Server) handleNew(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "only POST allowed", 405)
+		return
+	}
+
+	s.nr.NMLock.Lock()
+	defer s.nr.NMLock.Unlock()
+	nodeName := node.NodeName{"", randomHex(32)}
+	s.nr.NM.Nodes[nodeName] = node.NewManual()
+	u := *r.URL
+	u.Path = "/edit"
+	q := url.Values{"node-name": []string{nodeName.String()}}
+	u.RawQuery = q.Encode()
+	http.Redirect(w, r, u.String(), 302)
+	return
 }

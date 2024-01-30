@@ -43,6 +43,7 @@
 
 {{ define "header" }}
   Map
+  <button hx-post="/new" hx-swap="none">New</button>
   <button id="reload-button" class="nav-right" hx-get="" hx-target="#content" style="display: none;">
     Reload
   </button>
