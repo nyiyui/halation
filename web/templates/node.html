@@ -35,6 +35,14 @@
 <div class="popup-content">
   <form id="popup-form-{{ $id }}" method="post">
     <label>
+      <input type="checkbox" name="has-cue-number"{{ if .hasCueNumber }} checked{{ end }}/>
+      Has Cue Number
+    </label>
+    <label>
+      Cue Number
+      <input type="number" name="cue-number" value="{{ .cueNumber }}" />
+    </label>
+    <label>
       Name
       <input type="text" name="name" value="{{ .nodeName }}" />
     </label>
@@ -42,7 +50,6 @@
       Description
       <input type="text" name="description" value="{{ .node.GetDescription }}" />
     </label>
-    <input type="hidden" name="type-original" value="{{ $root.node.TypeName }}" />
     <label>
       Type
       <select name="type">

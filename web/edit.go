@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -43,7 +44,11 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if typeNew := r.PostForm.Get("type"); typeNew != r.PostForm.Get("type-original") {
+		origNodeName := nodeName
+		origNode := s.nr.NM.Nodes[origNodeName]
+		nodeName = node.ParseNodeName(r.PostForm.Get("name"))
+
+		if typeNew := r.PostForm.Get("type"); typeNew != origNode.TypeName() {
 			// type changed, redirect to page with node-type-override
 			u := *r.URL
 			q := u.Query()
@@ -53,8 +58,20 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		origNodeName := nodeName
-		nodeName = node.ParseNodeName(r.PostForm.Get("name"))
+		// TODO: race condition (put the map behind a mutex or something)
+		if r.PostForm.Has("has-cue-number") {
+			opposite := s.cuelist.GenOpposite()
+			delete(s.cuelist.Nodes, opposite[origNodeName])
+			cueNumber, err := strconv.ParseFloat(r.PostForm.Get("cue-number"), 32)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("cannot parse cue-number: %s", err), 422)
+				return
+			}
+			s.cuelist.Nodes[cueNumber] = nodeName
+		} else {
+			opposite := s.cuelist.GenOpposite()
+			delete(s.cuelist.Nodes, opposite[nodeName])
+		}
 
 		newNodeFn, ok := node.NodeTypes[r.PostForm.Get("type")]
 		if !ok {
@@ -169,6 +186,9 @@ func (s *Server) handleEdit(w http.ResponseWriter, r *http.Request) {
 	data := s.forTemplate(r)
 	data["node"] = n
 	data["nodeName"] = nodeName
+	cueNumber, ok := s.cuelist.GenOpposite()[nodeName]
+	data["hasCueNumber"] = ok
+	data["cueNumber"] = cueNumber
 	s.renderTemplate(w, r, "edit.html", data)
 }
 
