@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 
 	"nyiyui.ca/halation/aiz"
 	_ "nyiyui.ca/halation/gradient"
@@ -126,6 +127,10 @@ func (s *Server) handleMap(w http.ResponseWriter, r *http.Request) {
 			roots = append(roots, key)
 		}
 	}
+	opposite := s.cuelist.GenOpposite()
+	sort.Slice(roots, func(i, j int) bool {
+		return opposite[roots[i]] < opposite[roots[j]]
+	})
 	data := s.forTemplate(r)
 	data["roots"] = roots
 	data["pm"] = pm
