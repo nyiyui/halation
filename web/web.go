@@ -52,6 +52,7 @@ func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *
 	//s.sm.HandleFunc("/apply", s.handleApply)
 	s.sm.HandleFunc("/tasks", s.handleTasks)
 	s.sm.HandleFunc("/events/change", s.handleChange)
+	s.sm.HandleFunc("/export", s.handleExport)
 	return s
 }
 

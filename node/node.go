@@ -1,6 +1,7 @@
 package node
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -88,6 +89,30 @@ func NewNodeMap() *NodeMap {
 	return &NodeMap{
 		Nodes: map[NodeName]Node{},
 	}
+}
+
+type nodeMapJSON struct {
+	Nodes map[string]Node
+}
+
+func (nm *NodeMap) MarshalJSON() ([]byte, error) {
+	nmj := nodeMapJSON{make(map[string]Node, len(nm.Nodes))}
+	for nn, n := range nm.Nodes {
+		nmj.Nodes[nn.String()] = n
+	}
+	return json.Marshal(nmj)
+}
+
+func (nm *NodeMap) UnmarshalJSON(data []byte) error {
+	var nmj nodeMapJSON
+	err := json.Unmarshal(data, &nmj)
+	if err != nil {
+		return err
+	}
+	for nns, n := range nmj.Nodes {
+		nm.Nodes[ParseNodeName(nns)] = n
+	}
+	return nil
 }
 
 func (nm *NodeMap) GenPromiseMap() map[NodeName][]NodeName {
