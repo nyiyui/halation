@@ -1,20 +1,21 @@
 {{ if .htmx }}
 {{ template "content" . }}
 {{ else }}
- <!DOCTYPE html>
- <html>
-   <head>
-     <link rel="stylesheet" href="/static/base.css" />
-     <script src="/static/htmx.org@1.9.10.js"></script>
-     <!-- <script src="https://unpkg.com/htmx.org@1.9.10"></script> -->
-   </head>
-   <body>
-     <nav>
-       {{ template "header" . }}
-     </nav>
-     <div id="content">
-       {{ template "content" . }}
-     </div>
-   </body>
- </html>
- {{ end }}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <link rel="stylesheet" href="/static/base.css" />
+      <script src="/static/htmx.org@1.9.10.js"></script>
+      <!-- <script src="https://unpkg.com/htmx.org@1.9.10"></script> -->
+      {{ template "head" . }}
+    </head>
+    <body>
+      <nav>
+        {{ template "header" . }}
+      </nav>
+      <div id="content">
+        {{ template "content" . }}
+      </div>
+    </body>
+  </html>
+{{ end }}

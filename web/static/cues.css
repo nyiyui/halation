@@ -1,0 +1,7 @@
+.js-hidden {
+  display: none;
+}
+
+#cues.hidden .name-column {
+  display: none;
+}

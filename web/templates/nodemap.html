@@ -1,5 +1,3 @@
-{{ template "base.html" . }}
-
 {{ define "submap" }}
   {{ range $i, $name := $.names }}
   {{ $node := index $.nm.Nodes $name }}
@@ -40,6 +38,8 @@
   </div>
   {{ end }}
 {{ end }}
+
+{{ define "head" }}{{ end }}
 
 {{ define "header" }}
   Map
@@ -121,3 +121,5 @@
   }, { once: true });
 </script>
 {{ end }}
+
+{{ template "base.html" . }}

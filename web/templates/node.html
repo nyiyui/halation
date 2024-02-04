@@ -67,7 +67,7 @@
           Source Code
           <textarea name="source" rows="10" cols="40">{{ .node.Source }}</textarea>
         </label>
-        {{ template "promise-checkbox2.html" (dict
+        {{ partial "promise-checkbox2.html" (dict
           "field" "Source"
           "node" .node
         ) }}
@@ -96,7 +96,7 @@
           </select>
         </label>
         {{ if and .node.SG.Gradient (eq .node.SG.Gradient.TypeName "nyiyui.ca/halation/gradient.LinearGradient") }}
-          {{ template "node-gradient.html" .node.SG.Gradient }}
+          {{ partial "node-gradient.html" .node.SG.Gradient }}
         {{ else }}
           <label>
             Gradient
@@ -111,7 +111,7 @@
       <legend>Other Promises</legend>
       {{ range $i, $p := .node.BaseNodeRef.Promises }}
         {{ if (hasKey $coveredFields $p.FieldName) }}{{ continue }}{{ end }}
-        {{ template "promise-checkbox.html" (dict
+        {{ partial "promise-checkbox.html" (dict
           "checked" 1
           "node" $.node
           "field" $p.FieldName
@@ -120,7 +120,7 @@
         ) }}
       {{ end }}
       <!-- blank one for adding promises -->
-      {{ template "promise-checkbox.html" (dict
+      {{ partial "promise-checkbox.html" (dict
         "node" .node
         "fieldEditable" 1
       ) }}

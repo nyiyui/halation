@@ -1,0 +1,14 @@
+.map {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+.node {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 4px;
+  padding: 4px;
+  padding-left: 8px;
+  border-top: solid black 2px;
+  border-left: solid black 2px;
+}

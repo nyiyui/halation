@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"nyiyui.ca/halation/timeutil"
 	"time"
+
+	"nyiyui.ca/halation/timeutil"
 
 	"nyiyui.ca/halation/aiz"
 	"nyiyui.ca/halation/gradient"
@@ -22,15 +22,15 @@ func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
 	cuelist := node.NewCuelist()
 	runner := aiz.NewRunner()
 	/*
-		var err error
-		c := osc.NewDefaultClient()
-		c.Register(runner)
-		err = c.Blackout()
-		if err != nil {
-			panic(err)
-		}
+		  var err error
+			c := osc.NewDefaultClient()
+			c.Register(runner)
+			err = c.Blackout()
+			if err != nil {
+				panic(err)
+			}
+			log.Printf("osc setup ok")
 	*/
-	log.Printf("osc setup ok")
 	//mpvClient, err := mpv.NewClientUsingSubprocess()
 	//if err != nil {
 	//	panic(err)

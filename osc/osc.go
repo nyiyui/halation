@@ -3,6 +3,7 @@ package osc
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -57,6 +58,7 @@ func (c *Client) Blackout() (err error) {
 }
 
 func (c *Client) sendGet(command string) error {
+	log.Printf("osc: %s", command)
 	r, err := c.HTTP.Get(c.BaseURL.JoinPath(command).String())
 	if err != nil {
 		return err

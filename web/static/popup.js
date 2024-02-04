@@ -32,4 +32,44 @@ function morphIntoDraggable(elem, handle) {
   }
 }
 
+let latest;
+// https://stackoverflow.com/a/70691308
+// Note: persist popup (even after clicking outside) to allow having multiple popups open at the same time.
+function morphIntoPopup(elem) {
+  const absX = latest.clientX + window.scrollX;
+  const absY = latest.clientY + window.scrollY;
+  
+  const bcrParent = elem.parentElement.getBoundingClientRect();
+  const bcrPopup = elem.getBoundingClientRect();
+  
+  const maxX = bcrParent.width - bcrPopup.width;
+  const maxY = bcrParent.height - bcrPopup.height;
+  
+  //const x = Math.max(0, Math.min(absX, maxX));
+  //const y = Math.max(0, Math.min(absY, maxY));
+  const x = absX;
+  const y = absY;
+  
+  elem.classList.remove("popup-backburner");
+  Object.assign(elem.style, {
+    left: `${x}px`,
+    top: `${y}px`,
+  });
+};
+function mousemoveListener(e) {
+  latest = e;
+}
+function popupListener(e) {
+  if (!e.target.classList.contains("node-edit")) return;
+  let modal = document.getElementById(e.target.dataset.target);
+  morphIntoPopup(modal);
+}
+addEventListener("mousemove", mousemoveListener);
+addEventListener("htmx:afterRequest", popupListener);
+addEventListener("htmx:afterRequest", (e) => { // cleanup
+  if (e.target.id != "content") return;
+  removeEventListener("mousemove", mousemoveListener);
+  removeEventListener("htmx:afterRequest", popupListener);
+}, { once: true });
+
 export { morphIntoDraggable };

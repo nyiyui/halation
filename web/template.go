@@ -25,6 +25,22 @@ var staticFS embed.FS
 func init() {
 	tmpl = template.Must(template.New("").
 		Funcs(template.FuncMap{
+			"partial": func(name string, data interface{}) (interface{}, error) {
+				tmpl2, err := tmpl.Clone()
+				if err != nil {
+					return "", err
+				}
+				_, err = tmpl2.ParseFS(tmplFS, "templates/"+name)
+				if err != nil {
+					return "", err
+				}
+				buf := new(bytes.Buffer)
+				err = tmpl2.ExecuteTemplate(buf, name, data)
+				if err != nil {
+					return "", err
+				}
+				return template.HTML(buf.String()), nil
+			},
 			"toJSON": func(v interface{}) ([]byte, error) {
 				return json.MarshalIndent(v, "", "  ")
 			},
@@ -58,7 +74,8 @@ func init() {
 				return node.Promise{}
 			},
 		}).
-		Funcs(sprig.FuncMap()).ParseFS(tmplFS, "templates/*.html"))
+		Funcs(sprig.FuncMap()).
+		ParseFS(tmplFS, "templates/base.html"))
 }
 
 func (s *Server) setupStatic() {
@@ -66,9 +83,20 @@ func (s *Server) setupStatic() {
 }
 
 func (s *Server) renderTemplate(w http.ResponseWriter, r *http.Request, name string, data map[string]interface{}) {
+	tmpl2, err := tmpl.Clone()
+	if err != nil {
+		log.Printf("renderTemplate: %s", err)
+		http.Error(w, "rendering template failed", 500)
+		return
+	}
+	_, err = tmpl2.ParseFS(tmplFS, "templates/"+name)
+	if err != nil {
+		log.Printf("renderTemplate: %s", err)
+		http.Error(w, "rendering template failed", 500)
+		return
+	}
 	buf := new(bytes.Buffer)
-	var err error
-	err = tmpl.ExecuteTemplate(buf, name, data)
+	err = tmpl2.ExecuteTemplate(buf, name, data)
 	if err != nil {
 		log.Printf("renderTemplate: %s", err)
 		http.Error(w, "rendering template failed", 500)

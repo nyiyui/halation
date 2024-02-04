@@ -1,0 +1,43 @@
+{{ define "head" }}
+<script type="module" src="/static/cues.js" defer></script>
+<link rel="stylesheet" href="/static/cues.css" />
+{{ end }}
+
+{{ define "header" }}
+  Cues
+{{ end }}
+
+{{ define "content" }}
+<input type="button" class="js-hidden" id="cues-name-column-toggle" data-hide="Hide Names" data-show="Show Names" />
+<table id="cues">
+  <tr>
+    <th>Cue</th>
+    <th>Name</th>
+    <th>Desc</th>
+    <th>Actions</th>
+  </tr>
+  {{ range $i, $name := .roots }}
+  {{ $node := index $.nr.NM.Nodes $name }}
+  <tr>
+    <td>{{ index $.opposite $name }}</td>
+    <td class="name-column">{{ $name }}</td>
+    <td>{{ $node.GetDescription }}</td>
+    <td>
+      <button 
+        hx-post="/activate?node-name={{ $name }}" 
+        hx-swap="none"
+        class="node-activate"
+      >Activate</button>
+      <button 
+        hx-get="/edit?node-name={{ $name }}" 
+        hx-target="#node-i{{ $i }}-modal"
+        class="node-edit"
+        data-target="node-i{{ $i }}-modal"
+      >Edit</button>
+    </td>
+  </tr>
+  {{ end }}
+</table>
+{{ end }}
+
+{{ template "base.html" . }}

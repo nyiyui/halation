@@ -30,7 +30,8 @@ type Server struct {
 	runner  *aiz.Runner
 	nr      *node.NodeRunner
 	cuelist *node.Cuelist
-	tasks   *tasks.Tasks
+	// TODO: put cuelist inside NodeMap
+	tasks *tasks.Tasks
 
 	changeMuxS *notify.MultiplexerSender[Change]
 	changeMux  *notify.Multiplexer[Change]
@@ -46,6 +47,7 @@ func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *
 	}
 	s.changeMuxS, s.changeMux = notify.NewMultiplexerSender[Change]("Server")
 	s.setupStatic()
+	s.sm.HandleFunc("/cues", s.handleCues)
 	s.sm.HandleFunc("/map", s.handleMap)
 	s.sm.HandleFunc("/edit", s.handleEdit)
 	s.sm.HandleFunc("/activate", s.handleActivate)
@@ -115,6 +117,27 @@ func (s *Server) handleTasks(w http.ResponseWriter, r *http.Request) {
 	s.renderTemplate(w, r, "tasks.html", map[string]interface{}{
 		"s": s.forTemplate(r),
 	})
+}
+
+func (s *Server) handleCues(w http.ResponseWriter, r *http.Request) {
+	s.nr.NMLock.RLock()
+	defer s.nr.NMLock.RUnlock()
+	pm := s.nr.NM.GenPromiseMap()
+	roots := make([]node.NodeName, 0)
+	for key, node := range s.nr.NM.Nodes {
+		if len(node.BaseNodeRef().Promises) == 0 {
+			roots = append(roots, key)
+		}
+	}
+	opposite := s.cuelist.GenOpposite()
+	sort.Slice(roots, func(i, j int) bool {
+		return opposite[roots[i]] < opposite[roots[j]]
+	})
+	data := s.forTemplate(r)
+	data["roots"] = roots
+	data["pm"] = pm
+	data["opposite"] = opposite
+	s.renderTemplate(w, r, "cues.html", data)
 }
 
 func (s *Server) handleMap(w http.ResponseWriter, r *http.Request) {
