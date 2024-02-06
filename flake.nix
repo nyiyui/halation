@@ -10,6 +10,8 @@
         go
         gnumake
         wget
+        nodePackages.prettier
+        typescript
       ];
     };
   };
