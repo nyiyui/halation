@@ -56,7 +56,10 @@ func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *
 	s.sm.HandleFunc("/tasks", s.handleTasks)
 	s.sm.HandleFunc("/events/change", s.handleChange)
 	s.sm.HandleFunc("/export", s.handleExport)
-	s.sm.Handle("/api/v1", s.setupAPI())
+	s.sm.Handle("/api/v1/", s.setupAPI())
+	//s.sm.Handle("/api/v1/", http.StripPrefix("/api/v1/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//	log.Printf("%s", r.RequestURI)
+	//})))
 	return s
 }
 

@@ -12,6 +12,7 @@
         wget
         nodePackages.prettier
         typescript
+        nodejs
       ];
     };
   };

@@ -45,6 +45,20 @@ func (nn NodeName) IsZero() bool {
 	return nn.Package == "" && nn.Name == ""
 }
 
+func (nn NodeName) MarshalJSON() ([]byte, error) {
+	return json.Marshal(nn.String())
+}
+
+func (nn *NodeName) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+	*nn = ParseNodeName(s)
+	return nil
+}
+
 type NodeRequest struct {
 	Params fmt.Stringer
 }
@@ -92,13 +106,37 @@ func NewNodeMap() *NodeMap {
 }
 
 type nodeMapJSON struct {
-	Nodes map[string]Node
+	Nodes map[string]nodeJSON
+}
+
+type nodeJSON struct {
+	NodeType string
+	Node     Node
+}
+
+type nodeJSON2 struct {
+	NodeType string
+	Node     json.RawMessage
+}
+
+func (nj *nodeJSON) UnmarshalJSON(data []byte) error {
+	var nj2 nodeJSON2
+	err := json.Unmarshal(data, &nj2)
+	if err != nil {
+		return err
+	}
+	newNode, ok := NodeTypes[nj2.NodeType]
+	if !ok {
+		return fmt.Errorf("unsupported node type %s", nj2.NodeType)
+	}
+	n := newNode()
+	return json.Unmarshal(nj2.Node, n)
 }
 
 func (nm *NodeMap) MarshalJSON() ([]byte, error) {
-	nmj := nodeMapJSON{make(map[string]Node, len(nm.Nodes))}
+	nmj := nodeMapJSON{make(map[string]nodeJSON, len(nm.Nodes))}
 	for nn, n := range nm.Nodes {
-		nmj.Nodes[nn.String()] = n
+		nmj.Nodes[nn.String()] = nodeJSON{n.TypeName(), n}
 	}
 	return json.Marshal(nmj)
 }
@@ -110,7 +148,7 @@ func (nm *NodeMap) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	for nns, n := range nmj.Nodes {
-		nm.Nodes[ParseNodeName(nns)] = n
+		nm.Nodes[ParseNodeName(nns)] = n.Node
 	}
 	return nil
 }

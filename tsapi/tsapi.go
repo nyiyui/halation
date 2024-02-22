@@ -36,7 +36,7 @@ type Channel = {
 }
 type NodePromise = {
   FieldName: string,
-	SupplyNodeName: NodeName,
+	SupplyNodeName: string,
 }
 type NodeName = {
   Package: string,
@@ -51,24 +51,44 @@ type NodeInAPI = {
 	generateSG(f)
 
 	fmt.Fprint(f, `
+let baseUrl = "http://localhost:8080/api/v1/";
+
+function doRequest(method, path, params) {
+  return fetch((new URL(path, baseUrl)).toString(), {
+	  method,
+		...params,
+  }).then(response => {
+     if (!response.ok) {
+         throw new Error("HTTP error " + response.status);
+     }
+     return response.json();
+ })
+}
+
 function newNode(node: NodeInAPI) {
-	return doRequest("POST", "/node/new", { body: JSON.stringify(node) })
+	return doRequest("POST", "node/new", { body: JSON.stringify(node) })
 }
 function activateNode(name: NodeName) {
-	return doRequest("POST", "/node/" + encodeURIComponent(name.Package + "." + name.Name) + "/activate", {})
+	return doRequest("POST", "node/" + encodeURIComponent(name.Package + "." + name.Name) + "/activate", {})
 }
 function patchNode(name: NodeName, node: NodeInAPI) {
-	return doRequest("PATCH", "/node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
+	return doRequest("PATCH", "node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
 }
 function deleteNode(name: NodeName, node: NodeInAPI) {
-	return doRequest("DELETE", "/node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
+	return doRequest("DELETE", "node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
 }
-function getNodes() {
-  return doRequest("GET", "/nodes", {})
+type GetNodesResponse = {
+  Nodes: Record<string, NodeInAPI>,
+};
+function getNodes(): GetNodesResponse {
+  return doRequest("GET", "nodes", {})
 }
 function getNode(name: NodeName) {
-	return doRequest("GET", "/node/" + encodeURIComponent(name.Package + "." + name.Name), {})
+	return doRequest("GET", "node/" + encodeURIComponent(name.Package + "." + name.Name), {})
 }
+`)
+	fmt.Fprint(f, `
+export { newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
 `)
 }
 
@@ -78,7 +98,7 @@ func generateNodes(w io.Writer) {
 		n := newNode()
 		t := reflect.TypeOf(n).Elem()
 		inner := "Description: string,"
-		inner += "Promises: NodePromise[],"
+		inner += "Promises: NodePromise[] | null,"
 		for _, sf := range reflect.VisibleFields(t) {
 			if sf.Name == "BaseNode" || sf.Name == "Description" || sf.Name == "Promises" {
 				continue
