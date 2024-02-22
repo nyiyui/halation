@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import { getNodes } from '$lib/tsapi.ts';
   import ManualNode from '$lib/nodes/ManualNode.svelte';
+  import SetStateNode from '$lib/nodes/SetStateNode.svelte';
+  import EvalLuaNode from '$lib/nodes/EvalLuaNode.svelte';
   import { writable } from 'svelte/store';
   import {
     SvelteFlow,
@@ -45,6 +47,8 @@
 
   const nodeTypes = {
     'nyiyui.ca/halation/node.Manual': ManualNode,
+    'nyiyui.ca/halation/node.SetState': SetStateNode,
+    'nyiyui.ca/halation/node.EvalLua': EvalLuaNode,
   };
 
   onMount(function() {
@@ -70,8 +74,8 @@
           console.log(promise)
             newEdges.push({
               id: `${nodeName}-${promise.SupplyNodeName}`,
-              source: nodeName,
-              target: promise.SupplyNodeName,
+              source: promise.SupplyNodeName,
+              target: nodeName,
               targetHandle: promise.FieldName,
             })
           }
