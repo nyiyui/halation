@@ -33,6 +33,12 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@xyflow/svelte": "^0.0.36"
+		"@dagrejs/dagre": "^1.0.4",
+		"@xyflow/svelte": "^0.0.36",
+		"rete": "^2.0.3",
+		"rete-area-plugin": "^2.0.2",
+		"rete-connection-plugin": "^2.0.1",
+		"rete-render-utils": "^2.0.2",
+		"rete-svelte-plugin": "^2.0.1"
 	}
 }

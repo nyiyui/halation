@@ -57,25 +57,25 @@ function doRequest(method, path, params) {
   return fetch((new URL(path, baseUrl)).toString(), {
 	  method,
 		...params,
-  }).then(response => {
-     if (!response.ok) {
-         throw new Error("HTTP error " + response.status);
-     }
-     return response.json();
- })
+  }).then(async response => {
+    if (!response.ok) {
+			throw new Error("HTTP error " + response.status + ": " + await response.text());
+    }
+    return response.json();
+  })
 }
 
-function newNode(node: NodeInAPI) {
-	return doRequest("POST", "node/new", { body: JSON.stringify(node) })
+function newNode(name: string, node: NodeInAPI) {
+	return doRequest("POST", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
-function activateNode(name: NodeName) {
-	return doRequest("POST", "node/" + encodeURIComponent(name.Package + "." + name.Name) + "/activate", {})
+function activateNode(name: string) {
+	return doRequest("POST", "node/" + encodeURIComponent(name) + "/activate", {})
 }
-function patchNode(name: NodeName, node: NodeInAPI) {
-	return doRequest("PATCH", "node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
+function patchNode(name: string, node: NodeInAPI) {
+	return doRequest("PATCH", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
-function deleteNode(name: NodeName, node: NodeInAPI) {
-	return doRequest("DELETE", "node/" + encodeURIComponent(name.Package + "." + name.Name), { body: JSON.stringify(node) })
+function deleteNode(name: string, node: NodeInAPI) {
+	return doRequest("DELETE", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
 type GetNodesResponse = {
   Nodes: Record<string, NodeInAPI>,

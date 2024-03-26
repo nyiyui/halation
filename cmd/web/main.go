@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"net/http"
 	"time"
 
@@ -13,8 +14,14 @@ import (
 	"nyiyui.ca/halation/web"
 )
 
+var autosavePath string
+
 func main() {
+	flag.StringVar(&autosavePath, "autosave", "./autosave.halation-nm.json", "path to autosave JSON to")
+	flag.Parse()
+
 	s := web.NewServer(initShow())
+	s.AutosavePath = autosavePath
 	http.ListenAndServe(":8080", s)
 }
 

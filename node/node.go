@@ -106,10 +106,10 @@ func NewNodeMap() *NodeMap {
 }
 
 type nodeMapJSON struct {
-	Nodes map[string]nodeJSON
+	Nodes map[string]NodeJSON
 }
 
-type nodeJSON struct {
+type NodeJSON struct {
 	NodeType string
 	Node     Node
 }
@@ -119,7 +119,7 @@ type nodeJSON2 struct {
 	Node     json.RawMessage
 }
 
-func (nj *nodeJSON) UnmarshalJSON(data []byte) error {
+func (nj *NodeJSON) UnmarshalJSON(data []byte) error {
 	var nj2 nodeJSON2
 	err := json.Unmarshal(data, &nj2)
 	if err != nil {
@@ -130,13 +130,19 @@ func (nj *nodeJSON) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unsupported node type %s", nj2.NodeType)
 	}
 	n := newNode()
-	return json.Unmarshal(nj2.Node, n)
+	err = json.Unmarshal(nj2.Node, n)
+	if err != nil {
+		return err
+	}
+	nj.NodeType = nj2.NodeType
+	nj.Node = n
+	return nil
 }
 
 func (nm *NodeMap) MarshalJSON() ([]byte, error) {
-	nmj := nodeMapJSON{make(map[string]nodeJSON, len(nm.Nodes))}
+	nmj := nodeMapJSON{make(map[string]NodeJSON, len(nm.Nodes))}
 	for nn, n := range nm.Nodes {
-		nmj.Nodes[nn.String()] = nodeJSON{n.TypeName(), n}
+		nmj.Nodes[nn.String()] = NodeJSON{n.TypeName(), n}
 	}
 	return json.Marshal(nmj)
 }

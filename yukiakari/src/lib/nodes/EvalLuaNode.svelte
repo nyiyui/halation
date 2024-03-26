@@ -24,8 +24,8 @@
 <div class="colorpicker">
   <span>{data.Description}</span>
   (Lua)
-  <textarea>{data.Source}</textarea>
+  <textarea class="nodrag">{data.Source}</textarea>
   <Handle type="target" id="dummy" position={Position.Top} />
-  <Handle type="target" id="Source" position={Position.Top} />
+  <Handle type="target" id="Source" position={Position.Left} />
   <Handle type="source" position={Position.Bottom} />
 </div>

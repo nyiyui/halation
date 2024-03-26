@@ -36,7 +36,6 @@ func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struc
 		result, err := node.Activate(nr.runner, nil)
 		if err != nil {
 			log.Printf("activating node: %s", err)
-			return
 		}
 		var wg sync.WaitGroup
 		pm := nr.NM.GenPromiseMap()

@@ -27,7 +27,8 @@
   <span>{Description}</span>
   (Set State)
   <Handle type="target" id="dummy" position={Position.Top} />
-  <Handle type="target" id="SG" position={Position.Top} />
+  <Handle type="target" id="SG" position={Position.Left} />
+  {JSON.stringify(data.SG)}
   <Handle type="source" position={Position.Bottom} />
 </div>
 

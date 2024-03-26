@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"sort"
 
 	"nyiyui.ca/halation/aiz"
@@ -31,7 +32,8 @@ type Server struct {
 	nr      *node.NodeRunner
 	cuelist *node.Cuelist
 	// TODO: put cuelist inside NodeMap
-	tasks *tasks.Tasks
+	tasks        *tasks.Tasks
+	AutosavePath string
 
 	changeMuxS *notify.MultiplexerSender[Change]
 	changeMux  *notify.Multiplexer[Change]
@@ -228,4 +230,28 @@ func (s *Server) handleNew(w http.ResponseWriter, r *http.Request) {
 	u.RawQuery = q.Encode()
 	http.Redirect(w, r, u.String(), 302)
 	return
+}
+
+func (s *Server) autosave() {
+	err := s.saveNM()
+	if err != nil {
+		log.Printf("autosave failed: %s", err)
+	} else {
+		log.Printf("autosave ok.")
+	}
+}
+
+func (s *Server) saveNM() error {
+	f, err := os.Create(s.AutosavePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	err = enc.Encode(s.nr.NM)
+	if err != nil {
+		return err
+	}
+	return nil
 }
