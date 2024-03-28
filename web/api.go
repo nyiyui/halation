@@ -138,6 +138,5 @@ func (a *API) nodesEvents(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Fprintf(w, "data: %s\r\n\r\n", data)
 		w.(http.Flusher).Flush()
-		log.Printf("changed")
 	}
 }
