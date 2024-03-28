@@ -22,9 +22,7 @@ import (
 	"nyiyui.ca/halation/web/tasks"
 )
 
-type Change struct {
-	NodeName node.NodeName
-}
+type Change = node.Change
 
 type Server struct {
 	sm      *http.ServeMux
@@ -48,6 +46,7 @@ func NewServer(runner *aiz.Runner, nr *node.NodeRunner, cuelist *node.Cuelist) *
 		tasks:   new(tasks.Tasks),
 	}
 	s.changeMuxS, s.changeMux = notify.NewMultiplexerSender[Change]("Server")
+	nr.SetChangeMuxS(s.changeMuxS)
 	s.setupStatic()
 	s.sm.HandleFunc("/cues", s.handleCues)
 	s.sm.HandleFunc("/map", s.handleMap)
@@ -101,16 +100,16 @@ func (s *Server) handleChange(w http.ResponseWriter, r *http.Request) {
 	ch := make(chan Change)
 	s.changeMux.Subscribe("handleChange", ch)
 	defer s.changeMux.Unsubscribe(ch)
-	fmt.Fprint(w, "event: connected\n\n")
+	fmt.Fprint(w, "event: connected\r\n\r\n")
 	w.(http.Flusher).Flush()
 	for cr := range ch {
-		fmt.Fprint(w, "event: changed\n")
+		fmt.Fprint(w, "event: changed\r\n")
 		data, err := json.Marshal(cr)
 		if err != nil {
 			log.Printf("handleChange: marshal: %s", err)
 			continue
 		}
-		fmt.Fprintf(w, "data: %s\n\n", data)
+		fmt.Fprintf(w, "data: %s\r\n\r\n", data)
 		w.(http.Flusher).Flush()
 	}
 }
@@ -250,6 +249,19 @@ func (s *Server) saveNM() error {
 	enc := json.NewEncoder(f)
 	enc.SetIndent("", "  ")
 	err = enc.Encode(s.nr.NM)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Server) LoadAutosave() error {
+	f, err := os.Open(s.AutosavePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	err = json.NewDecoder(f).Decode(s.nr.NM)
 	if err != nil {
 		return err
 	}

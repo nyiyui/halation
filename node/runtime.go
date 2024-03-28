@@ -5,12 +5,19 @@ import (
 	"sync"
 
 	"nyiyui.ca/halation/aiz"
+	"nyiyui.ca/halation/notify"
 )
 
+type Change struct {
+	NodeName  NodeName
+	Activated bool
+}
+
 type NodeRunner struct {
-	runner *aiz.Runner
-	NM     *NodeMap
-	NMLock sync.RWMutex
+	runner     *aiz.Runner
+	NM         *NodeMap
+	NMLock     sync.RWMutex
+	changeMuxS *notify.MultiplexerSender[Change]
 }
 
 func NewNodeRunner(runner *aiz.Runner) *NodeRunner {
@@ -18,6 +25,10 @@ func NewNodeRunner(runner *aiz.Runner) *NodeRunner {
 		runner: runner,
 		NM:     NewNodeMap(),
 	}
+}
+
+func (nr *NodeRunner) SetChangeMuxS(changeMuxS *notify.MultiplexerSender[Change]) {
+	nr.changeMuxS = changeMuxS
 }
 
 func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struct{}) {
@@ -33,6 +44,9 @@ func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struc
 		node = node.Clone()
 	}()
 	go func() {
+		if nr.changeMuxS != nil {
+			nr.changeMuxS.Send(Change{NodeName: nn, Activated: true})
+		}
 		result, err := node.Activate(nr.runner, nil)
 		if err != nil {
 			log.Printf("activating node: %s", err)

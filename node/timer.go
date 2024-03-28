@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"nyiyui.ca/halation/aiz"
+	"nyiyui.ca/halation/timeutil"
 )
 
 type Timer struct {
 	*BaseNode
-	Delay time.Duration `json:"delay"`
+	Delay timeutil.Duration `json:"delay"`
 }
 
 func newTimerBlank() *Timer {
@@ -17,7 +18,7 @@ func newTimerBlank() *Timer {
 }
 
 func NewTimer(delay time.Duration) *Timer {
-	return &Timer{BaseNode: new(BaseNode), Delay: delay}
+	return &Timer{BaseNode: new(BaseNode), Delay: timeutil.Duration(delay)}
 }
 
 func (t *Timer) Clone() Node {
@@ -28,7 +29,7 @@ func (t *Timer) Clone() Node {
 }
 
 func (t *Timer) Activate(r *aiz.Runner, params fmt.Stringer) (result fmt.Stringer, err error) {
-	<-time.After(t.Delay)
+	<-time.After(time.Duration(t.Delay))
 	return nil, nil
 }
 

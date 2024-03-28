@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"nyiyui.ca/halation/node"
@@ -22,7 +23,7 @@ func (s *Server) setupAPI() http.Handler {
 	r.HandleFunc("PATCH /api/v1/node/{nodeName}", a.nodePatch)
 	//r.DELETE("/node/:node-name", a.nodeDelete)
 	r.HandleFunc("POST /api/v1/node/{nodeName}/activate", a.nodeActivate)
-	//r.GET("/nodes/events", a.nodesEvents)
+	r.HandleFunc("GET /api/v1/nodes/events", a.nodesEvents)
 
 	//r.POST("/cues", a.cuesGet)
 	//r.GET("/cues", a.cuesGet)
@@ -66,6 +67,7 @@ func (a *API) nodeNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.s.autosave()
+	a.s.changeMuxS.Send(Change{NodeName: nodeName})
 	http.Error(w, "{}", 200)
 }
 
@@ -92,6 +94,7 @@ func (a *API) nodePatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.s.autosave()
+	a.s.changeMuxS.Send(Change{NodeName: nodeName})
 	http.Error(w, "{}", 200)
 }
 
@@ -112,4 +115,28 @@ func (a *API) nodeActivate(w http.ResponseWriter, r *http.Request) {
 	}
 	a.s.nr.ActivateNodeUsingPromises(nodeName, nil)
 	http.Error(w, "{}", 200)
+}
+
+func (a *API) nodesEvents(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Content-Type", "text/event-stream")
+	ch := make(chan Change)
+	a.s.changeMux.Subscribe("handleChange", ch)
+	defer a.s.changeMux.Unsubscribe(ch)
+	fmt.Fprint(w, "event: connected\r\n\r\n")
+	w.(http.Flusher).Flush()
+	log.Printf("connected")
+	for cr := range ch {
+		fmt.Fprint(w, "event: changed\r\n")
+		data, err := json.Marshal(cr)
+		if err != nil {
+			log.Printf("handleChange: marshal: %s", err)
+			continue
+		}
+		fmt.Fprintf(w, "data: %s\r\n\r\n", data)
+		w.(http.Flusher).Flush()
+		log.Printf("changed")
+	}
 }

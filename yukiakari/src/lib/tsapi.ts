@@ -52,6 +52,9 @@ function doRequest(method, path, params) {
   })
 }
 
+function listenChanges(name: string, node: NodeInAPI) {
+	return new EventSource((new URL("nodes/events", baseUrl)).toString());
+}
 function newNode(name: string, node: NodeInAPI) {
 	return doRequest("POST", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
@@ -74,4 +77,4 @@ function getNode(name: NodeName) {
 	return doRequest("GET", "node/" + encodeURIComponent(name.Package + "." + name.Name), {})
 }
 
-export { newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
+export { listenChanges, newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
