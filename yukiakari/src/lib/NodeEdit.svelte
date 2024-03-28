@@ -136,10 +136,7 @@
             {#each node.Node.SG.State.channels as channel, i}
               <tr>
                 <td><input type=number bind:value={channel.channelID} /></td>
-                <td><ColorPicker2 bind:hue={channel.hue} /></td>
-                <td><input type=number bind:value={channel.level} /></td>
-                <td><input type=number bind:value={channel.hue} /></td>
-                <td><input type=number bind:value={channel.saturation} /></td>
+                <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
               </tr>
             {/each}
           </table>
