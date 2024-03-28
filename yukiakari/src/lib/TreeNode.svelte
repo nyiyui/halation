@@ -61,24 +61,32 @@
   <div class="node-self">
     <div>
       <!-- <code>{nodeName}</code> -->
-      {#if nodeName == ".__live"}<small>Live</small>{/if}
+      {#if nodeName === ".__live"}<small>Live</small>{/if}
       <small>{nodeTypeLetters[nodeType]}</small>
       {node.Description}
     </div>
-    {#if node.Promises}
+    {#if node.Promises && node.Promises.filter(p => p.FieldName !== "dummy").length > 0}
       <div>
         Promises:
         {#each node.Promises as promise}
-          <code>{promise.FieldName}</code>
+          {#if promise.FieldName !== "dummy"}
+            <code>{promise.FieldName}</code>
+          {/if}
         {/each}
       </div>
     {/if}
-    <div>
-      <input type="button" value="Activate" on:click={activate} />
-      <input type="button" value="New Downstream" on:click={newDownstream} />
-      <a href="/edit?node-name={encodeURIComponent(nodeName)}">Edit</a>
-    </div>
-    </div>
+    {#if nodeName === ".__live"}
+      <div>
+        (cannot edit live nodes)
+      </div>
+    {:else}
+      <div>
+        <input type="button" value="Activate" on:click={activate} />
+        <input type="button" value="New Downstream" on:click={newDownstream} />
+        <a href="/edit?node-name={encodeURIComponent(nodeName)}">Edit</a>
+      </div>
+    {/if}
+  </div>
   <div>
     {#if reversePromises[nodeName]}
       {#if reversePromises[nodeName].length == 1}
