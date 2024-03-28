@@ -3,11 +3,11 @@
   import { newNode, activateNode } from '$lib/tsapi.ts';
 
   export let nodes;
-  export let nid: string;
+  export let nodeName: string;
   export let reversePromises: Record<string, Array<string>>;
   
-  let node = nodes[nid].Node;
-  let nodeType = nodes[nid].NodeType;
+  let node = nodes[nodeName].Node;
+  let nodeType = nodes[nodeName].NodeType;
 
   const nodeTypeLetters = {
     "nyiyui.ca/halation/node.Manual": "Knob",
@@ -19,7 +19,7 @@
   const ctx = getContext('listen');
   ctx.getSource().addEventListener('changed', (e) => {
     const data = JSON.parse(e.data);
-    if (data.NodeName != nid) return;
+    if (data.NodeName != nodeName) return;
     if (!data.Activated) return;
     bong();
   })
@@ -37,7 +37,7 @@
   }
 
   function activate() {
-    let response = activateNode(nid);
+    let response = activateNode(nodeName);
   }
 
   function newDownstream() {
@@ -48,7 +48,7 @@
       Node: {
         Description: "Untitled",
         Promises: [
-          {FieldName: "dummy", SupplyNodeName: nid},
+          {FieldName: "dummy", SupplyNodeName: nodeName},
         ],
       },
     });
@@ -60,7 +60,8 @@
 <div class="node" bind:this={nodeElement}>
   <div class="node-self">
     <div>
-      <!-- <code>{nid}</code> -->
+      <!-- <code>{nodeName}</code> -->
+      {#if nodeName == ".__live"}<small>Live</small>{/if}
       <small>{nodeTypeLetters[nodeType]}</small>
       {node.Description}
     </div>
@@ -75,17 +76,17 @@
     <div>
       <input type="button" value="Activate" on:click={activate} />
       <input type="button" value="New Downstream" on:click={newDownstream} />
-      <a href="/edit?node-name={encodeURIComponent(nid)}">Edit</a>
+      <a href="/edit?node-name={encodeURIComponent(nodeName)}">Edit</a>
     </div>
     </div>
   <div>
-    {#if reversePromises[nid]}
-      {#if reversePromises[nid].length == 1}
-        <svelte:self {nodes} nid={reversePromises[nid][0]} {reversePromises} />
+    {#if reversePromises[nodeName]}
+      {#if reversePromises[nodeName].length == 1}
+        <svelte:self {nodes} nodeName={reversePromises[nodeName][0]} {reversePromises} />
       {:else}
-      {#each reversePromises[nid] as downstream}
+      {#each reversePromises[nodeName] as downstream}
         <div style="display: block;">
-          <svelte:self {nodes} nid={downstream} {reversePromises} />
+          <svelte:self {nodes} nodeName={downstream} {reversePromises} />
         </div>
       {/each}
       {/if}

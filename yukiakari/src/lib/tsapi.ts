@@ -19,14 +19,14 @@ type NodeInAPI = {
 	Node: Node,
 }
 // Node Types
+type Timer = {Description: string,Promises: NodePromise[] | null,Delay: string,};
+const TimerTypeName = "nyiyui.ca/halation/node.Timer";
 type EvalLua = {Description: string,Promises: NodePromise[] | null,Source: string,};
 const EvalLuaTypeName = "nyiyui.ca/halation/node.EvalLua";
 type Manual = {Description: string,Promises: NodePromise[] | null,};
 const ManualTypeName = "nyiyui.ca/halation/node.Manual";
 type SetState = {Description: string,Promises: NodePromise[] | null,SG: SG,};
 const SetStateTypeName = "nyiyui.ca/halation/node.SetState";
-type Timer = {Description: string,Promises: NodePromise[] | null,Delay: string,};
-const TimerTypeName = "nyiyui.ca/halation/node.Timer";
 // State Types
 type State = MPVState|OSCState;
 type MPVState = {FilePath: string,Paused: boolean,Position: number,Fullscreen: boolean,ExtraProperties: Record<string, number | boolean | string>,};
@@ -55,6 +55,9 @@ function doRequest(method, path, params) {
 function listenChanges(name: string, node: NodeInAPI) {
 	return new EventSource((new URL("nodes/events", baseUrl)).toString());
 }
+function ensureNode(name: string, node: NodeInAPI) {
+	return doRequest("POST", "node/" + encodeURIComponent(name) + "?override=yes", { body: JSON.stringify(node) })
+}
 function newNode(name: string, node: NodeInAPI) {
 	return doRequest("POST", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
@@ -77,4 +80,4 @@ function getNode(name: NodeName) {
 	return doRequest("GET", "node/" + encodeURIComponent(name.Package + "." + name.Name), {})
 }
 
-export { listenChanges, newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
+export { listenChanges, ensureNode, newNode, activateNode, patchNode, deleteNode, getNodes, getNode };

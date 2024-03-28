@@ -25,18 +25,18 @@
     getNodes().then((data) => {
       let newRoots = [];
       let newReversePromises = {};
-      for (const nid in data.Nodes) {
-        const node = data.Nodes[nid].Node;
+      for (const nodeName in data.Nodes) {
+        const node = data.Nodes[nodeName].Node;
         if (node.Promises) {
           for (const promise of node.Promises) {
             if (!newReversePromises[promise.SupplyNodeName]) {
               newReversePromises[promise.SupplyNodeName] = [];
             }
-            newReversePromises[promise.SupplyNodeName].push(nid);
+            newReversePromises[promise.SupplyNodeName].push(nodeName);
           }
         }
         if (node.Promises && node.Promises.length != 0) continue;
-        newRoots.push(nid);
+        newRoots.push(nodeName);
       }
       roots.set(newRoots);
       reversePromises.set(newReversePromises);
@@ -79,9 +79,9 @@ loading
 {:then nodes}
   {$roots.length} roots
   <input type="button" value="New Node" on:click={handleNewNode} />
-  {#each $roots as nid}
+  {#each $roots as nodeName}
     <div style="display: block;">
-      <TreeNode nodes={nodes.Nodes} {nid} reversePromises={$reversePromises} />
+      <TreeNode nodes={nodes.Nodes} {nodeName} reversePromises={$reversePromises} />
     </div>
   {/each}
 {/await}

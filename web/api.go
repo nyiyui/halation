@@ -45,6 +45,7 @@ func (a *API) nodesGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *API) nodeNew(w http.ResponseWriter, r *http.Request) {
+	override := r.URL.Query().Get("override") == "yes"
 	var nj node.NodeJSON
 	err := json.NewDecoder(r.Body).Decode(&nj)
 	if err != nil {
@@ -56,7 +57,7 @@ func (a *API) nodeNew(w http.ResponseWriter, r *http.Request) {
 		a.s.nr.NMLock.RLock()
 		defer a.s.nr.NMLock.RUnlock()
 		_, ok := a.s.nr.NM.Nodes[nodeName]
-		if ok {
+		if ok && !override {
 			http.Error(w, fmt.Sprintf("node %s already exists", nodeName), 404)
 			return false
 		}

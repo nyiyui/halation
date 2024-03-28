@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getNodes, patchNode } from '$lib/tsapi.ts';
+  import { getNodes, listenChanges, activateNode, patchNode, ensureNode } from '$lib/tsapi.ts';
   import ManualNode from '$lib/nodes/ManualNode.svelte';
   import SetStateNode from '$lib/nodes/SetStateNode.svelte';
   import EvalLuaNode from '$lib/nodes/EvalLuaNode.svelte';
@@ -13,6 +13,20 @@
     const urlParams = new URLSearchParams(window.location.search);
     nodeName = urlParams.get("node-name");
   });
+
+  let livePromise;
+  let live = false;
+  $: {
+    let _ = node;
+    renderLive();
+  }
+  function renderLive() {
+    if (!live) return;
+    console.log('pass');
+    let node2 = structuredClone(node);
+    node2.Node.Promises = null;
+    livePromise = ensureNode("__live", node2).then(async () => await activateNode("__live"));
+  }
 
   let node;
   let promise;
@@ -33,6 +47,27 @@
   }
 
   $: { node; savePromise = null; }
+
+  onMount(() => {
+    let source = listenChanges();
+    source.addEventListener("changed", (e) => {
+      const data = JSON.parse(e.data);
+      if (data.NodeName != nodeName) return;
+      if (!data.Activated) return;
+      bong();
+    })
+  })
+  let activated = false;
+  function bong() {
+    activated = true;
+    setTimeout(() => {
+      activated = false;
+    }, 3000);
+  }
+
+  function activate() {
+    let response = activateNode(nodeName);
+  }
 </script>
 
 
@@ -45,20 +80,25 @@ loading
 {/await}
 {/if}
 {:else}
+<button on:click={activate}>Activate</button>
 <button on:click={saveNode}>Save</button>
-{#if !!savePromise}
-  {#await savePromise}
-    (saving)
-  {:then}
-    (saved)
-  {:catch err}
-    ({err})
-  {/await}
-{:else}
-  (not saved)
+<label>
+  <input type=checkbox bind:checked={live} />
+  Live
+</label>
+{#if live}
+  {#if !!livePromise}
+    {#await livePromise}
+      (wait…)
+    {:then}
+      (live)
+    {:catch err})
+      ({err})
+    {/await}
+  {:else}
+    (not activated)
+  {/if}
 {/if}
-<NodeEdit bind:node />
-<button on:click={saveNode}>Save</button>
 {#if !!savePromise}
   {#await savePromise}
     (saving)
@@ -70,4 +110,8 @@ loading
 {:else}
   (not saved)
 {/if}
+{#if activated}
+(activated)
+{/if}
+<NodeEdit bind:node />
 {/if}

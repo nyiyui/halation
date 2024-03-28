@@ -68,6 +68,9 @@ function doRequest(method, path, params) {
 function listenChanges(name: string, node: NodeInAPI) {
 	return new EventSource((new URL("nodes/events", baseUrl)).toString());
 }
+function ensureNode(name: string, node: NodeInAPI) {
+	return doRequest("POST", "node/" + encodeURIComponent(name) + "?override=yes", { body: JSON.stringify(node) })
+}
 function newNode(name: string, node: NodeInAPI) {
 	return doRequest("POST", "node/" + encodeURIComponent(name), { body: JSON.stringify(node) })
 }
@@ -91,7 +94,7 @@ function getNode(name: NodeName) {
 }
 `)
 	fmt.Fprint(f, `
-export { listenChanges, newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
+export { listenChanges, ensureNode, newNode, activateNode, patchNode, deleteNode, getNodes, getNode };
 `)
 }
 

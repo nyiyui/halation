@@ -67,31 +67,31 @@
     }
   }
 
-  let channelNames = {
-    0: "invalid",
-    1: "left small",
-    2: "left podium",
-    3: "left front",
-    4: "left side",
-    5: "left flood",
-    6: "left ground",
-    7: "left centre wall",
-    8: "left centre back",
-    10: "right centre wall",
-    11: "right centre back",
-    12: "right centre ground",
-    13: "right centre back2",
-    14: "right wall",
-    15: "right flood",
-    16: "right ground",
-    17: "right front",
-    24: "lx3 left back",
-    31: "lx4 blue",
-    33: "lx4 white",
-    32: "lx4 yellow",
-    34: "lx4 red",
-    35: "lx4 blue/green/white",
-    36: "lx4 pink-purple",
+  let channelProps = {
+    0: {name: "invalid"},
+    1: {name: "left small"},
+    2: {name: "left podium"},
+    3: {name: "left front"},
+    4: {name: "left side"},
+    5: {name: "left flood"},
+    6: {name: "left ground"},
+    7: {name: "left centre wall"},
+    8: {name: "left centre back"},
+    10: {name: "right centre wall"},
+    11: {name: "right centre back"},
+    12: {name: "right centre ground"},
+    13: {name: "right centre back2"},
+    14: {name: "right wall"},
+    15: {name: "right flood"},
+    16: {name: "right ground"},
+    17: {name: "right front"},
+    24: {name: "lx3 left back", colour: false},
+    31: {name: "lx4 blue", colour: false},
+    33: {name: "lx4 white", colour: false},
+    32: {name: "lx4 yellow", colour: false},
+    34: {name: "lx4 red", colour: false},
+    35: {name: "lx4 blue/green/white", colour: false},
+    36: {name: "lx4 pink-purple", colour: false},
   };
 
   function handleChange(i) {
@@ -168,19 +168,23 @@
           <table>
             <tr>
               <th colspan=2>Channel (L/R is audience)</th>
-              <th>Colour</th>
+              <th>Colour (HSV) / Level (%)</th>
             </tr>
             {#each node.Node.SG.State.channels as channel, i}
               <tr>
                 <td><input type=number bind:value={channel.channelID} /></td>
                 <td>
                   <select value={channel.channelID.toString()} on:change={handleChange(i)}>
-                    {#each Object.entries(channelNames) as [ch, name]}
-                      <option value={ch}>{ch} - {name}</option>
+                    {#each Object.entries(channelProps) as [ch, props]}
+                      <option value={ch}>{ch} - {props.name}</option>
                     {/each}
                   </select>
                 </td>
-                <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
+                {#if channelProps[channel.channelID].colour == false}
+                  <td><label>Level <input type=number bind:value={channel.level} /></label></td>
+                {:else}
+                  <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
+                {/if}
               </tr>
             {/each}
           </table>
