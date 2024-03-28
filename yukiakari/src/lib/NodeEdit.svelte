@@ -66,6 +66,43 @@
       // node.Node.SG.State.channels[i].level = e.detail.hsv.v;
     }
   }
+
+  let channelNames = {
+    0: "invalid",
+    1: "left small",
+    2: "left podium",
+    3: "left front",
+    4: "left side",
+    5: "left flood",
+    6: "left ground",
+    7: "left centre wall",
+    8: "left centre back",
+    10: "right centre wall",
+    11: "right centre back",
+    12: "right centre ground",
+    13: "right centre back2",
+    14: "right wall",
+    15: "right flood",
+    16: "right ground",
+    17: "right front",
+    24: "lx3 left back",
+    31: "lx4 blue",
+    33: "lx4 white",
+    32: "lx4 yellow",
+    34: "lx4 red",
+    35: "lx4 blue/green/white",
+    36: "lx4 pink-purple",
+  };
+
+  function handleChange(i) {
+    return (e) => {
+      let ch = parseInt(e.target.value);
+      if (node.Node.SG.State.channels[i].channelID != ch) {
+        node.Node.SG.State.channels[i].channelID = ch
+      }
+      console.log(ch);
+    }
+  }
 </script>
 
 <label>
@@ -130,12 +167,19 @@
           <button on:click={addChannel}>Add Row</button>
           <table>
             <tr>
-              <th>Channel</th>
+              <th colspan=2>Channel (L/R is audience)</th>
               <th>Colour</th>
             </tr>
             {#each node.Node.SG.State.channels as channel, i}
               <tr>
                 <td><input type=number bind:value={channel.channelID} /></td>
+                <td>
+                  <select value={channel.channelID.toString()} on:change={handleChange(i)}>
+                    {#each Object.entries(channelNames) as [ch, name]}
+                      <option value={ch}>{ch} - {name}</option>
+                    {/each}
+                  </select>
+                </td>
                 <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
               </tr>
             {/each}

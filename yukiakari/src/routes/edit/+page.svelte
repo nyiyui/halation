@@ -45,19 +45,29 @@ loading
 {/await}
 {/if}
 {:else}
+<button on:click={saveNode}>Save</button>
 {#if !!savePromise}
   {#await savePromise}
-    saving
+    (saving)
   {:then}
-    saved
+    (saved)
   {:catch err}
-    {err}
+    ({err})
   {/await}
 {:else}
-  not saved
+  (not saved)
 {/if}
-<hr />
-<button on:click={saveNode}>Save</button>
 <NodeEdit bind:node />
 <button on:click={saveNode}>Save</button>
+{#if !!savePromise}
+  {#await savePromise}
+    (saving)
+  {:then}
+    (saved)
+  {:catch err})
+    ({err})
+  {/await}
+{:else}
+  (not saved)
+{/if}
 {/if}
