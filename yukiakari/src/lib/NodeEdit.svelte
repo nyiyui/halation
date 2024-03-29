@@ -103,6 +103,16 @@
       console.log(ch);
     }
   }
+
+  function deletePromise(i) {
+    node.Node.Promises.splice(i, 1);
+    node.Node.Promises = node.Node.Promises;
+  }
+
+  function deleteChannel(i) {
+    node.Node.SG.State.channels.splice(i, 1);
+    node.Node.SG.Statet.channels = node.Node.SG.Statet.channels;
+  }
 </script>
 
 <label>
@@ -121,23 +131,30 @@
 <fieldset>
   <legend>Promises</legend>
   <button on:click={addPromise}>Add Promise</button>
-  <ul>
-    {#if node.Node.Promises}
+  {#if node.Node.Promises}
+    <table>
+      <tr>
+        <th>Supply</th>
+        <th>Field</th>
+        <th>Actions</th>
+      </tr>
       {#each node.Node.Promises as promise, i}
-        <li>
-          <label>
-            Supply
+        <tr>
+          <td>
             <input bind:value={node.Node.Promises[i].SupplyNodeName} />
-          </label>
-          <label>
-            Field
+            <br />
+            <NodeSmall nodeName={promise.SupplyNodeName} />
+          </td>
+          <td>
             <input bind:value={node.Node.Promises[i].FieldName} />
-          </label>
-          <NodeSmall nodeName={promise.SupplyNodeName} />
-        </li>
+          </td>
+          <td>
+            <button on:click={() => deletePromise(i)}>Delete</button>
+          </td>
+        </tr>
       {/each}
-    {/if}
-  </ul>
+    </table>
+  {/if}
   <button on:click={addPromise}>Add Promise</button>
 </fieldset>
 <fieldset>
@@ -169,6 +186,7 @@
             <tr>
               <th colspan=2>Channel (L/R is audience)</th>
               <th>Colour (HSV) / Level (%)</th>
+              <th>Actions</th>
             </tr>
             {#each node.Node.SG.State.channels as channel, i}
               <tr>
@@ -185,6 +203,9 @@
                 {:else}
                   <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
                 {/if}
+                <td>
+                  <button on:click={() => deleteChannel(i)}>Delete</button>
+                </td>
               </tr>
             {/each}
           </table>
