@@ -113,5 +113,5 @@ loading
 {#if activated}
 (activated)
 {/if}
-<NodeEdit bind:node />
+<NodeEdit bind:node {nodeName} />
 {/if}

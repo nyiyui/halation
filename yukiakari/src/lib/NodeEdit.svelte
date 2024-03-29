@@ -3,6 +3,7 @@
   import ColorPicker2 from '$lib/ColorPicker2.svelte';
 
   export let node;
+  export let nodeName;
 
   function addPromise() {
     if (!node.Node.Promises) node.Node.Promises = [];
@@ -125,6 +126,10 @@
     <option value="nyiyui.ca/halation/node.SetState">State</option>
     <option value="nyiyui.ca/halation/node.Timer">Timer</option>
   </select>
+</label>
+<label>
+  Name
+  <input value={nodeName} readonly/>
 </label>
 <label>
   Description
