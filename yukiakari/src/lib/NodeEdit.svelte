@@ -50,12 +50,14 @@
 
   let channels = [];
   $: {
-    if (channels.length != node.Node.SG.State.channels.length) {
-      channels = Array(node.Node.SG.State.channels.length);
+    if ('SG' in node.Node) {
+      if (channels.length != node.Node.SG.State.channels.length) {
+        channels = Array(node.Node.SG.State.channels.length);
+      }
+      node.Node.SG.State.channels.forEach((channel, i) => {
+        channels[i] = {h:channel.hue, s:channel.saturation, v:channel.level};
+      })
     }
-    node.Node.SG.State.channels.forEach((channel, i) => {
-      channels[i] = {h:channel.hue, s:channel.saturation, v:channel.level};
-    })
   }
 
   function updateColour(i) {
