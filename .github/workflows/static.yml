@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: 'cd ./yukiakari && npm i'
       - run: 'cd ./yukiakari && npm run build'
       - name: Setup Pages
         uses: actions/configure-pages@v5
