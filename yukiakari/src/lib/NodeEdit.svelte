@@ -1,4 +1,5 @@
 <script>
+  import { inlineHelp } from '$lib/config.ts';
   import NodeSmall from '$lib/NodeSmall.svelte';
   import ColorPicker2 from '$lib/ColorPicker2.svelte';
 
@@ -137,6 +138,13 @@
 </label>
 <fieldset>
   <legend>Promises</legend>
+  {#if inlineHelp}
+    <p>
+      Nodes are activated when a promise is fulfilled.
+      The field is filled by the return value of the node.
+      If the field is <code>dummy</code>, no field is filled.
+    </p>
+  {/if}
   <button on:click={addPromise}>Add Promise</button>
   {#if node.Node.Promises}
     <table>
@@ -229,6 +237,11 @@
         </select>
       </label>
       {#if node.Node.SG.GradientType == "nyiyui.ca/halation/gradient.LinearGradient" && "duration" in node.Node.SG.Gradient}
+        {#if inlineHelp}
+          <p>
+            The duration and resolution strings below are a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". (See <a href="https://pkg.go.dev/time#ParseDuration">Go time.ParseDuration documentation</a> for details.)
+          </p>
+        {/if}
         <label>
           Duration
           <input bind:value={node.Node.SG.Gradient.duration} />
@@ -247,7 +260,7 @@
 </details>
 
 <style>
-label {
+p, label {
   display: block;
 }
 </style>

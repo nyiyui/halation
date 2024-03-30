@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getNodes, listenChanges, activateNode, patchNode, ensureNode } from '$lib/tsapi.ts';
+  import { getNodes, listenChanges, activateNode, patchNode, ensureNode } from '$lib/tsapi2.ts';
   import ManualNode from '$lib/nodes/ManualNode.svelte';
   import SetStateNode from '$lib/nodes/SetStateNode.svelte';
   import EvalLuaNode from '$lib/nodes/EvalLuaNode.svelte';

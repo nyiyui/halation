@@ -1,6 +1,6 @@
 <script lang="ts">
   import { setContext, onMount } from 'svelte';
-  import { getNodes, listenChanges, newNode } from '$lib/tsapi.ts';
+  import { getNodes, listenChanges, newNode } from '$lib/tsapi2.ts';
   import ManualNode from '$lib/nodes/ManualNode.svelte';
   import SetStateNode from '$lib/nodes/SetStateNode.svelte';
   import EvalLuaNode from '$lib/nodes/EvalLuaNode.svelte';
@@ -45,28 +45,40 @@
 
   let source;
   onMount(() => {
-    console.log('listen');
-    source = listenChanges();
-    source.onmessage = console.log;
-    console.log('listen2', source);
-    source.addEventListener("message", (e) => {
-      console.log("listenChanges: "+e);
-    });
-    source.addEventListener("connected", (e) => {
-      console.log("listenChanges: connected");
-    });
-    source.addEventListener("changed", handleChange)
+    let reconnectTimeout = 1000;
+
+    function tryConnect() {
+        connect();
+        reconnectTimeout *= 2;
+        if (reconnectTimeout >= 30000) {
+            reconnectTimeout = 30000;
+        }
+    }
+    
+    
+    function connect() {
+        source = listenChanges();
+        source.addEventListener("connected", (e) => {
+          console.log("listenChanges: received connected event");
+        });
+        source.onmessage = console.log;
+        source.addEventListener('open', () => {
+          reconnectTimeout = 1000;
+          console.log("listenChanges: connected");
+        });
+        source.addEventListener('error', () => {
+          source.close();
+          setTimeout(tryConnect, reconnectTimeout)
+          console.log(`listenChanges: reconnecting in ${reconnectTimeout} ms`);
+        });
+    }
+    
+    connect();
   })
   function getSource() {
     return source;
   }
   setContext('listen', { getSource })
-
-  function handleChange(e) {
-    console.log(e)
-    let data = JSON.parse(e.data);
-    console.log(data.NodeName, data.Activated);
-  }
 
   let nodes;
   onMount(() => { nodes = getNodes(); });

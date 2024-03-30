@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
@@ -11,6 +12,7 @@ import (
 type Change struct {
 	NodeName  NodeName
 	Activated bool
+	Error     string
 }
 
 type NodeRunner struct {
@@ -44,12 +46,16 @@ func (nr *NodeRunner) ActivateNodeUsingPromises(nn NodeName, doneCh chan<- struc
 		node = node.Clone()
 	}()
 	go func() {
-		if nr.changeMuxS != nil {
-			nr.changeMuxS.Send(Change{NodeName: nn, Activated: true})
+		result, activateErr := node.Activate(nr.runner, nil)
+		if activateErr != nil {
+			log.Printf("activating node: %s", activateErr)
 		}
-		result, err := node.Activate(nr.runner, nil)
-		if err != nil {
-			log.Printf("activating node: %s", err)
+		if nr.changeMuxS != nil {
+			msg := fmt.Sprint(activateErr)
+			if activateErr == nil {
+				msg = ""
+			}
+			nr.changeMuxS.Send(Change{NodeName: nn, Activated: true, Error: msg})
 		}
 		var wg sync.WaitGroup
 		pm := nr.NM.GenPromiseMap()

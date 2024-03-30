@@ -1,5 +1,5 @@
 <script>
-  import { getNodes } from '$lib/tsapi.ts';
+  import { getNodes } from '$lib/tsapi2.ts';
 
   export let nodeName;
 

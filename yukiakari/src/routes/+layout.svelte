@@ -1,6 +1,11 @@
+<script>
+  import { inlineHelp } from '$lib/config.ts';
+</script>
+
 <nav>
   <img src="/favicon.png" height="16px" />
   Halation
+	<a href="/config">Config</a>
 	<a href="/tree">Tree</a>
 </nav>
 

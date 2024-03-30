@@ -11,9 +11,11 @@ import (
 )
 
 var autosavePath string
+var addr string
 
 func main() {
 	flag.StringVar(&autosavePath, "autosave", "./autosave.halation-nm.json", "path to autosave JSON to")
+	flag.StringVar(&addr, "addr", ":3939", "bind address")
 	flag.Parse()
 
 	s := web.NewServer(initShow())
@@ -24,7 +26,7 @@ func main() {
 	} else {
 		log.Print("load autosave ok")
 	}
-	http.ListenAndServe(":8080", s)
+	http.ListenAndServe(addr, s)
 }
 
 func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte';
-  import { newNode, activateNode } from '$lib/tsapi.ts';
+  import { newNode, activateNode } from '$lib/tsapi2.ts';
+  import { inlineHelp } from '$lib/config.ts';
 
   export let nodes;
   export let nodeName: string;
@@ -21,19 +22,27 @@
     const data = JSON.parse(e.data);
     if (data.NodeName != nodeName) return;
     if (!data.Activated) return;
-    bong();
+    bong(data.Error == "" ? "ok" : "error");
   })
 
   let nodeElement;
-  function bong() {
-    nodeElement.style.borderLeftColor = 'aqua';
-    setTimeout(() => {
-      nodeElement.style.transition = 'border-left-color 1s';
-      nodeElement.style.removeProperty('border-left-color');
-    }, 3000);
-    setTimeout(() => {
-      nodeElement.style.removeProperty('transition');
-    }, 3000+1000);
+  function bong(style) {
+    console.log('bong', style);
+    const timeout = 3000;
+    nodeElement.style.borderLeftColor = {ok: 'chartreuse', error: 'crimson'}[style];
+    nodeElement.style.borderLeftWidth = '4px';
+    nodeElement.style.paddingLeft = '2px';
+    if (style != 'error') {
+      setTimeout(() => {
+        nodeElement.style.transition = '0.3s';
+        nodeElement.style.removeProperty('border-left-color');
+        nodeElement.style.removeProperty('border-left-width');
+        nodeElement.style.removeProperty('padding-left');
+      }, timeout);
+      setTimeout(() => {
+        nodeElement.style.removeProperty('transition');
+      }, timeout+1000);
+    }
   }
 
   function activate() {
@@ -77,7 +86,7 @@
     {/if}
     {#if nodeName === ".__live"}
       <div>
-        (cannot edit live nodes)
+        {#if $inlineHelp}(cannot edit live nodes){/if}
       </div>
     {:else}
       <div>
@@ -115,13 +124,5 @@
 .node-self {
   display: flex;
   flex-direction: column;
-}
-
-@keyframes activated {
-  50% {
-    border-left-color: aqua;
-    border-left-width: 4px;
-    padding-left: 2px;
-  }
 }
 </style>
