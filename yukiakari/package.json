@@ -34,6 +34,7 @@
 	"type": "module",
 	"dependencies": {
 		"@dagrejs/dagre": "^1.0.4",
+		"@sveltejs/adapter-static": "^3.0.1",
 		"@xyflow/svelte": "^0.0.36",
 		"rete": "^2.0.3",
 		"rete-area-plugin": "^2.0.2",

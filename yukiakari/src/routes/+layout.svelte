@@ -1,12 +1,13 @@
 <script>
   import { inlineHelp } from '$lib/config.ts';
+  import { base } from '$app/paths';
 </script>
 
 <nav>
-  <img src="/favicon.png" height="16px" />
+  <img src="{base}/favicon.png" height="16px" />
   Halation
-	<a href="/config">Config</a>
-	<a href="/tree">Tree</a>
+	<a href="{base}/config">Config</a>
+	<a href="{base}/tree">Tree</a>
 </nav>
 
 <div class="slot-container">
