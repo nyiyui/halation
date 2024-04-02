@@ -1,0 +1,35 @@
+name: build web
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22'
+
+    - name: test
+      run: go test -v ./...
+
+    - name: build
+      run: go build -v ./...
+
+    - name: cross-platform build
+      run: |
+        GOOS=windows GOARCH=amd64 go build -o halation-web-windows-amd64.exe ./cmd/web
+        GOOS=darwin GOARCH=amd64 go build -o halation-web-darwin-amd64 ./cmd/web
+        GOOS=darwin GOARCH=arm64 go build -o halation-web-darwin-arm64 ./cmd/web
+
+    - name: upload cross-platform builds
+      uses: actions/upload-artifact@v4
+      with:
+        name: builds
+        path: 'halation-web-*'
+        overwrite: true
