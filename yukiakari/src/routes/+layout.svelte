@@ -4,8 +4,8 @@
 </script>
 
 <nav>
-  <img src="{base}/favicon.png" height="16px" />
-  Halation
+  <img src="{base}/favicon.png" height="20px" />
+  <span>Halation</span>
 	<a href="{base}/config">Config</a>
 	<a href="{base}/tree">Tree</a>
 </nav>
@@ -25,6 +25,7 @@
   }
   nav a {
     color: aqua;
+    text-decoration: none;
   }
   nav a:hover {
     text-decoration: underline;

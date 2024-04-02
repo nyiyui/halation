@@ -95,9 +95,8 @@ loading
       <input type="checkbox" bind:checked={$noEdit} />
       No Editing
     </label>
+    <input type="button" value="New Node" on:click={handleNewNode} />
   </div>
-  {$roots.length} roots
-  <input type="button" value="New Node" on:click={handleNewNode} />
   {#each $roots as nodeName}
     <div style="display: block;">
       <TreeNode nodes={nodes.Nodes} {nodeName} reversePromises={$reversePromises} />

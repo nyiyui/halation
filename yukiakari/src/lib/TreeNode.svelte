@@ -91,7 +91,7 @@
       </div>
     {:else}
       <div>
-        <input type="button" value="Activate" on:click={activate} />
+        <button class="activate" on:click={activate}>Activate</button>
         {#if !$noEdit}
         <input type="button" value="New Downstream" on:click={newDownstream} />
         <a href="/edit?node-name={encodeURIComponent(nodeName)}">Edit</a>

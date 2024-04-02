@@ -1,0 +1,13 @@
+body {
+  font-family: 'Noto Sans', 'Roboto', sans-serif;
+}
+
+button.delete {
+  color: darkred;
+}
+button.activate {
+  color: blue;
+}
+button.save {
+  color: darkgreen;
+}

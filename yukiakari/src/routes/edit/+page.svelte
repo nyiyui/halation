@@ -84,8 +84,8 @@ loading
 {/await}
 {/if}
 {:else}
-<button on:click={activate}>Activate</button>
-<button on:click={saveNode}>Save</button>
+<button class="activate" on:click={activate}>Activate</button>
+<button class="save" on:click={saveNode}>Save</button>
 <label>
   <input type=checkbox bind:checked={live} />
   Live

@@ -1,5 +1,5 @@
 <script>
-  import { inlineHelp } from '$lib/config.ts';
+  import { inlineHelp, showNames } from '$lib/config.ts';
   import NodeSmall from '$lib/NodeSmall.svelte';
   import ColorPicker2 from '$lib/ColorPicker2.svelte';
 
@@ -128,17 +128,19 @@
     <option value="nyiyui.ca/halation/node.Timer">Timer</option>
   </select>
 </label>
-<label>
-  Name
-  <input value={nodeName} readonly/>
-</label>
+{#if $showNames}
+  <label>
+    Name
+    <input value={nodeName} readonly/>
+  </label>
+{/if}
 <label>
   Description
   <input bind:value={node.Node.Description}/>
 </label>
 <fieldset>
   <legend>Promises</legend>
-  {#if inlineHelp}
+  {#if $inlineHelp}
     <p>
       Nodes are activated when a promise is fulfilled.
       The field is filled by the return value of the node.
@@ -156,7 +158,11 @@
       {#each node.Node.Promises as promise, i}
         <tr>
           <td>
-            <input bind:value={node.Node.Promises[i].SupplyNodeName} />
+            {#if $showNames}
+              <input bind:value={node.Node.Promises[i].SupplyNodeName} />
+            {:else}
+              (show names to edit for now)
+            {/if}
             <br />
             <NodeSmall nodeName={promise.SupplyNodeName} />
           </td>
@@ -164,7 +170,7 @@
             <input bind:value={node.Node.Promises[i].FieldName} />
           </td>
           <td>
-            <button on:click={() => deletePromise(i)}>Delete</button>
+            <button class="delete" on:click={() => deletePromise(i)}>Delete</button>
           </td>
         </tr>
       {/each}
@@ -219,7 +225,7 @@
                   <td><ColorPicker2 bind:hue={channel.hue} bind:saturation={channel.saturation} bind:value={channel.level} /></td>
                 {/if}
                 <td>
-                  <button on:click={() => deleteChannel(i)}>Delete</button>
+                  <button class="delete" on:click={() => deleteChannel(i)}>Delete</button>
                 </td>
               </tr>
             {/each}
@@ -238,7 +244,7 @@
         </select>
       </label>
       {#if node.Node.SG.GradientType == "nyiyui.ca/halation/gradient.LinearGradient" && "duration" in node.Node.SG.Gradient}
-        {#if inlineHelp}
+        {#if $inlineHelp}
           <p>
             The duration and resolution strings below are a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". (See <a href="https://pkg.go.dev/time#ParseDuration">Go time.ParseDuration documentation</a> for details.)
           </p>
