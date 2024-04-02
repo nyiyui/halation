@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rs/cors"
+
 	"nyiyui.ca/halation/aiz"
 	"nyiyui.ca/halation/node"
 	"nyiyui.ca/halation/web"
@@ -26,7 +28,12 @@ func main() {
 	} else {
 		log.Print("load autosave ok")
 	}
-	http.ListenAndServe(addr, s)
+
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"https://halation.nyiyui.ca", "http://halation.nyiyui.ca"},
+	})
+
+	http.ListenAndServe(addr, c.Handler(s))
 }
 
 func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
