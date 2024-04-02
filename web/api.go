@@ -114,7 +114,11 @@ func (a *API) nodeActivate(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	a.s.nr.ActivateNodeUsingPromises(nodeName, nil)
+	go func() {
+		a.s.activationLock.Lock()
+		defer a.s.activationLock.Unlock()
+		a.s.nr.ActivateNodeUsingPromises(nodeName, nil)
+	}()
 	http.Error(w, "{}", 200)
 }
 

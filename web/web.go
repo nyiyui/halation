@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"sync"
 
 	"nyiyui.ca/halation/aiz"
 	_ "nyiyui.ca/halation/gradient"
@@ -30,8 +31,9 @@ type Server struct {
 	nr      *node.NodeRunner
 	cuelist *node.Cuelist
 	// TODO: put cuelist inside NodeMap
-	tasks        *tasks.Tasks
-	AutosavePath string
+	tasks          *tasks.Tasks
+	AutosavePath   string
+	activationLock sync.Mutex
 
 	changeMuxS *notify.MultiplexerSender[Change]
 	changeMux  *notify.Multiplexer[Change]
