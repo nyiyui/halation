@@ -30,10 +30,16 @@ func (l *LinearGradient) PreferredResolution() time.Duration {
 }
 
 func (l *LinearGradient) ValueAt(i time.Duration) float32 {
+	if l.Duration_ == 0 {
+		return 1
+	}
 	return float32(i) / float32(l.Duration_)
 }
 
 func (l *LinearGradient) Values(resolution time.Duration) []float32 {
+	if l.Duration_ == 0 {
+		return []float32{1}
+	}
 	values := make([]float32, 0, time.Duration(l.Duration_)/resolution)
 	for i := time.Duration(0); i <= time.Duration(l.Duration_); i += resolution {
 		values = append(values, l.ValueAt(i))

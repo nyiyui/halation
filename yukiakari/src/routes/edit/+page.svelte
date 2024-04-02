@@ -25,6 +25,10 @@
     console.log('pass');
     let node2 = structuredClone(node);
     node2.Node.Promises = null;
+    if ('SG' in node2.Node) {
+      node2.Node.GradientType = "nyiyui.ca/halation/gradient.LinearGradient";
+      node2.Node.Gradient = { duration: "0", preferredResolution: "0" };
+    }
     livePromise = ensureNode("__live", node2).then(async () => await activateNode("__live"));
   }
 
