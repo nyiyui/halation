@@ -233,6 +233,7 @@
       <label>
         Gradient Type
         <select bind:value={node.Node.SG.GradientType} on:change={updateNode}>
+          <option value="">none</option>
           <option value="nyiyui.ca/halation/gradient.LinearGradient">Linear</option>
         </select>
       </label>
