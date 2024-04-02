@@ -1,6 +1,7 @@
 <script lang="ts">
   import { setContext, onMount } from 'svelte';
   import { getNodes, listenChanges, newNode } from '$lib/tsapi2.ts';
+  import { noEdit } from '$lib/config.ts';
   import ManualNode from '$lib/nodes/ManualNode.svelte';
   import SetStateNode from '$lib/nodes/SetStateNode.svelte';
   import EvalLuaNode from '$lib/nodes/EvalLuaNode.svelte';
@@ -89,6 +90,12 @@
 {#await nodes}
 loading
 {:then nodes}
+  <div>
+    <label>
+      <input type="checkbox" bind:checked={$noEdit} />
+      No Editing
+    </label>
+  </div>
   {$roots.length} roots
   <input type="button" value="New Node" on:click={handleNewNode} />
   {#each $roots as nodeName}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte';
   import { newNode, activateNode } from '$lib/tsapi2.ts';
+  import { noEdit } from '$lib/config.ts';
   import { inlineHelp } from '$lib/config.ts';
 
   export let nodes;
@@ -91,8 +92,10 @@
     {:else}
       <div>
         <input type="button" value="Activate" on:click={activate} />
+        {#if !$noEdit}
         <input type="button" value="New Downstream" on:click={newDownstream} />
         <a href="/edit?node-name={encodeURIComponent(nodeName)}">Edit</a>
+        {/if}
       </div>
     {/if}
   </div>

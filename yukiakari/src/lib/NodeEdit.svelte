@@ -74,10 +74,10 @@
   let channelProps = {
     0: {name: "invalid"},
     1: {name: "left small"},
-    2: {name: "left podium"},
+    2: {name: "left podium", colour: false},
     3: {name: "left front"},
     4: {name: "left side"},
-    5: {name: "left flood"},
+    5: {name: "left flood (LED)", colour: true},
     6: {name: "left ground"},
     7: {name: "left centre wall"},
     8: {name: "left centre back"},
