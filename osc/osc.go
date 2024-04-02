@@ -25,7 +25,7 @@ type Client struct {
 }
 
 func NewDefaultClient() *Client {
-	u, err := url.Parse("http://10.10.0.5:8080")
+	u, err := url.Parse("http://10.10.0.10:8080")
 	if err != nil {
 		panic(err)
 	}
