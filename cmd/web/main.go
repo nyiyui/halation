@@ -9,6 +9,7 @@ import (
 
 	"nyiyui.ca/halation/aiz"
 	"nyiyui.ca/halation/node"
+	"nyiyui.ca/halation/osc"
 	"nyiyui.ca/halation/web"
 )
 
@@ -41,15 +42,13 @@ func initShow() (*aiz.Runner, *node.NodeRunner, *node.Cuelist) {
 	runner := aiz.NewRunner()
 	var err error
 	_ = err
-	/*
-		c := osc.NewDefaultClient()
-		c.Register(runner)
-		err = c.Blackout()
-		if err != nil {
-			panic(err)
-		}
-		log.Printf("osc setup ok")
-	*/
+	c := osc.NewDefaultClient()
+	c.Register(runner)
+	err = c.Blackout()
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("osc setup ok")
 	//mpvClient, err := mpv.NewClientUsingSubprocess()
 	//if err != nil {
 	//	panic(err)

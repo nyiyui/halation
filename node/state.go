@@ -9,7 +9,8 @@ import (
 
 type SetState struct {
 	*BaseNode
-	SG *aiz.SG `halation:""`
+	SG     *aiz.SG `halation:""`
+	Series string  `halation:""`
 }
 
 func newSetStateBlank() *SetState {

@@ -17,18 +17,20 @@ type Cue struct {
 }
 
 type SG struct {
-	State    State    `json:"state"`
-	Gradient Gradient `json:"gradient"`
+	Series   SeriesName `json:"seriesName"`
+	State    State      `json:"state"`
+	Gradient Gradient   `json:"gradient"`
 }
 
 func (sg *SG) Clone() *SG {
-	return &SG{sg.State.Clone(), sg.Gradient.Clone()}
+	return &SG{sg.Series, sg.State.Clone(), sg.Gradient.Clone()}
 }
 
 var StateTypes = map[string]func() State{}
 var GradientTypes = map[string]func() Gradient{}
 
 type sgJSON struct {
+	Series       string
 	StateType    string
 	State        json.RawMessage
 	GradientType string
@@ -38,6 +40,7 @@ type sgJSON struct {
 func (sg *SG) MarshalJSON() ([]byte, error) {
 	var j sgJSON
 	var err error
+	j.Series = sg.Series
 	if sg.State != nil {
 		j.State, err = json.Marshal(sg.State)
 		if err != nil {
@@ -81,6 +84,7 @@ func (sg *SG) UnmarshalJSON(data []byte) error {
 	}
 	sg.State = s
 	sg.Gradient = g
+	sg.Series = j.Series
 	return nil
 }
 

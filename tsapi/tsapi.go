@@ -27,7 +27,7 @@ func main() {
 	}
 	defer f.Close()
 	fmt.Fprint(f, `
-type SG = { State: State, StateType: string, Gradient: Gradient, GradientType: string }
+type SG = { Series: string, State: State, StateType: string, Gradient: Gradient, GradientType: string }
 type Channel = {
   ChannelID: number,
 	Level: number,

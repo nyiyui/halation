@@ -26,6 +26,7 @@
     if (node.NodeType == "nyiyui.ca/halation/node.SetState") {
       if (!node.Node.SG) {
         node.Node.SG = {
+          Series: "",
           StateType: "",
           State: {},
           GradientType: "",
@@ -62,21 +63,12 @@
     }
   }
 
-  function updateColour(i) {
-    return (e) => {
-      console.log(i, e.detail.hsv);
-      // node.Node.SG.State.channels[i].hue = e.detail.hsv.h;
-      // node.Node.SG.State.channels[i].saturation = e.detail.hsv.s;
-      // node.Node.SG.State.channels[i].level = e.detail.hsv.v;
-    }
-  }
-
   let channelProps = {
     0: {name: "invalid"},
-    1: {name: "left small"},
-    2: {name: "left podium", colour: false},
+    1: {name: "left flood", colour: false},
+    2: {name: "left podium"},
     3: {name: "left front"},
-    4: {name: "left side"},
+    4: {name: "left podium-right"},
     5: {name: "left flood (LED)", colour: true},
     6: {name: "left ground"},
     7: {name: "left centre wall"},
@@ -187,6 +179,10 @@
       <input bind:value={node.Node.delay} />
     </label>
   {:else if node.NodeType == "nyiyui.ca/halation/node.SetState" && node.Node.SG}
+    <label>
+      Series
+      <input type=text bind:value={node.Node.SG.Series} />
+    </label>
     <fieldset>
       <legend>State</legend>
       <label>

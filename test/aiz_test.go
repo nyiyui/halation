@@ -2,11 +2,12 @@ package test
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/google/go-cmp/cmp"
 	. "nyiyui.ca/halation/aiz"
 	"nyiyui.ca/halation/gradient"
 	"nyiyui.ca/halation/osc"
-	"testing"
 )
 
 func TestJSON(t *testing.T) {
@@ -14,13 +15,13 @@ func TestJSON(t *testing.T) {
 		Cues: []Cue{
 			{
 				SGs: []SG{
-					{&osc.State{
+					{"a", &osc.State{
 						Blackout: true,
 					}, &gradient.LinearGradient{
 						Duration_:            1000,
 						PreferredResolution_: 100,
 					}},
-					{&osc.State{
+					{"b", &osc.State{
 						Channels: []osc.Channel{
 							{1, 100, 0, 0},
 						},
